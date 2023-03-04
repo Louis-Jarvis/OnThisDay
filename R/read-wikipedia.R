@@ -37,16 +37,21 @@ today_list_vec <- today_list_str %>%
 # drop empty string elements ("")
 
 # pull out the date
-date_day <- today_list[1]
+date_day <- today_list_vec[1]
 
-events_to_table <- function(events_list) {
+events_to_table <- function(event_str) {
   
    ##if (stringr::str_detect(pattern = "[0-9+] – ")) {
      
      event_row <- tibble::tibble(
-       date = stringr::str_extract("1837 – Chicago", pattern = '(\\d{4})')
-       details = stringr::str_split(" – ")[[1]][2]
+       Year = stringr::str_extract(event_str, pattern = '(\\d{4})'),
+       Details = stringr::str_split(event_str, pattern = " – ")[[1]][2]
      )
   
   return(event_row)
 }
+
+# today_list_vec %>%
+#   base::Filter(f = function(x) stringr::str_detect(x, pattern = "\\d{4} – ")) %>%
+#   purrr::map_df(.f = events_to_table) %>%
+#   dplyr::bind_rows()
