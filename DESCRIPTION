@@ -1,10 +1,9 @@
 Package: OnThisDay
-Title: What the Package Does (One Line, Title Case)
+Title: Find Out What Happened On This Very Day! Courtesy of Wikipedia.
 Version: 0.0.0.9000
 Authors@R: 
-    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"),
-           comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: What the package does (one paragraph).
+    person("Louis", "jarvis", , "louisjarvisnz@gmail.com", role = c("aut", "cre"))
+Description: Scrape Wikipedia's "On This Day" section and return a summary of the events.
 License: Apache License (>= 2)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
