@@ -4,25 +4,10 @@
 # Famours births and deaths
 # Return the url
 
+#TODO give option to only print one fact at a time
+##TODO use global config to set defaults
 
-#' Drop all text starting at "More anniversaries"
-#'
-#' @param paragraph_str character vector, the wikipedia page content as a single string
-#'
-#' @return a string with all text between "More anniversaries" and the end excluded
-#' @export
-drop_more_anniveraries <- function(paragraph_str) {
-  
-  anni_start <- paragraph_str %>% 
-    stringr::str_locate(pattern = "More anniversaries") %>% 
-    purrr::pluck(1)
-  
-  str_stripped <- paragraph_str %>% 
-    stringr::str_sub(start = 1, end = anni_start-1) 
-  
-  return(str_stripped)
-}
-
+#TODO coloured output for df
 
 #' Convert the yyyy - event pairs into tibble rows
 #'
@@ -34,7 +19,7 @@ drop_more_anniveraries <- function(paragraph_str) {
 events_to_table <- function(event_str) {
   
   event_row <- tibble::tibble(
-    Year = stringr::str_extract(event_str, pattern = '(\\d{4})'),
+    Year = stringr::str_extract(event_str, pattern = '(\\d{4})'), 
     Details = stringr::str_split(event_str, pattern = " – ")[[1]][2]
   )
   
@@ -56,6 +41,8 @@ create_events_table <- function(events_list) {
   
   return(event_tbl)
 }
+
+extract_birthdays
 
 
 #TODO wrap in a try execpt
@@ -79,35 +66,26 @@ read_wiki_html <- function() {
 ##str_end <- stringr::str_length(today_list_str)
 
 
-
-#' split large string into list of sentences
-#'
-#' @param today_list_str character vector
-#'
-#' @return list of characters, each a different sentence
-#' @export
-text_to_vec <- function(today_list_str) {
-  
-  # this stops multiple sentences being put on the same line e.g. 
-  # foo.Bar -- > foo.\nBar, which can then be split into multiple lines
-  
-  today_list_vec <- today_list_str %>%
-    drop_more_anniveraries() %>%
-    stringr::str_replace(
-      string = .,
-      pattern = "(?<=[a-z])\\.(?=[A-Z])",
-      replacement = ".\n"
-    ) %>%
-    stringr::str_split(pattern = "\n") %>%
-    purrr::pluck(1) %>%
-    base::Filter(f = function(line) dplyr::ifelse(line == "", F, T), x = .) 
-  
-  return(today_list_vec)
-}
-
-
 # drop empty string elements ("")
 
 # pull out the date
 #date_day <- today_list_vec[1]
+
+get_daily_facts <- function() {
+  events_list <- read_wiki_html() %>%
+    text_to_vec()
+  
+  cli::cli_h1("Todays's date")
+  date_day <- events_list[1]
+  
+  cli::cli_h2("On This Day...")
+  events_tbl <- events_list %>% 
+    create_events_table() 
+  
+  print(events_tbl)
+  cli::cli_par()
+  
+  cli::cli_h1("Famous Births and Deaths")
+}
+  
 
