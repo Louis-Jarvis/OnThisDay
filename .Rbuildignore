@@ -4,3 +4,6 @@
 ^LICENSE\.md$
 ^.*\.Rproj$
 ^\.Rproj\.user$
+^\.github$
+^OnThisDay logo\.png$
+^OnThisDay-logo\.png$
