@@ -1,7 +1,5 @@
-![pkg logo](OnThisDay%20logo.png%22)
-
+<img src="OnThisDay logo.png"/>
 # OnThisDay
-
 
 <!-- badges: start -->
 
