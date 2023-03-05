@@ -44,35 +44,18 @@ create_events_table <- function(events_list) {
 }
 
 extract_birth_deaths <- function(events_list) {
-  
-  #browser()
-  last_pos <- length(events_list)
+    last_pos <- length(events_list)
   
   # convert the string into a list of birth and deaths
   persons_list <- events_list[last_pos] %>% 
-    #stringr::str_replace_all(pattern = "\\)", replacement = "\\)\\n") %>%
     stringr::str_split(pattern = "\\)") %>% 
     purrr::pluck(1) %>% 
     as.list() %>%
     base::Filter(f = function(line) dplyr::if_else(line == "", F, T), x = .) 
   
-  # # extract the birth/death date
-  # stringr::str_extract("Stephen III of Hungary  \\(b. 1172", pattern = "[bd]. \\d{4}") #TODO fix
-  # 
-  # # determine birth or death
-  # birth_or_death <- ifelse(grepl(pattern = ".b"), "Born On This Day", "Died On This Day")
-  # 
-  # name <- stringr::str_split(s, "\\(") %>% 
-  #   purrr::pluck(1) %>% 
-  #   stringr::str_trim()
-  # 
-  # tibble::tibble(
-  #   Person = name,
-  #   Event = birth_or_death
-  # )
-  
   return(persons_list)
 }
+
 
 birth_deaths_to_tbl <- function(event_str) {
   # extract the birth/death date
@@ -114,15 +97,6 @@ read_wiki_html <- function() {
   return(today_list_str)
 }
 
-# remove the "More anniversaries" onwards section
-##str_end <- stringr::str_length(today_list_str)
-
-
-# drop empty string elements ("")
-
-# pull out the date
-#date_day <- today_list_vec[1]
-
 #TODO add args to specify which outputs are wanted
 get_daily_facts <- function() {
   events_list <- read_wiki_html() %>%
@@ -143,12 +117,8 @@ get_daily_facts <- function() {
   print(events_tbl)
   cli::cli_text("")
   
-  #cli::cli_par()
   cli::cli_h2("Famous People")
-  #cli::cli_par()
-  #cli::cli_end()
   
-  #browser()
   famous_ppl_tbl <- events_list %>% 
     extract_birth_deaths() %>%
     purrr::map(.f = birth_deaths_to_tbl) %>%
