@@ -46,14 +46,14 @@ text_to_event_list <- function(today_list_str) {
 #' Convert the yyyy - event pairs into tibble rows
 #'
 #' @param event_str list of character vectors, each containing a yyyy - event pair
-#' e.g. 2012 – A series of blasts occurred at an arms dump ...
+#' e.g. 2012 - A series of blasts occurred at an arms dump ...
 #'
 #' @return a dataframe with columns: `Year` `and Details``
 events_as_row <- function(event_str) {
   
   event_row <- tibble::tibble(
     Year = stringr::str_extract(event_str, pattern = '(\\d{4})'), 
-    Details = stringr::str_split(event_str, pattern = " – ")[[1]][2]
+    Details = stringr::str_split(event_str, pattern = " - ")[[1]][2]
   )
   
   return(event_row)
@@ -68,7 +68,7 @@ events_as_row <- function(event_str) {
 create_events_table <- function(events_list) {
   
   event_tbl <- events_list %>%
-    base::Filter(f = function(x) stringr::str_detect(x, pattern = "\\d{4} – ")) %>%
+    base::Filter(f = function(x) stringr::str_detect(x, pattern = "\\d{4} - ")) %>%
     purrr::map_df(.f = events_as_row) %>%
     dplyr::bind_rows() 
   
@@ -95,7 +95,7 @@ to_bd_list <- function(events_list) {
 
 #' Convert birth/death event to tibble row
 #'
-#' @param event_str 
+#' @param event_str character vector with format Person (b./d. YYYY)
 #'
 #' @return tibble with columns Person, Event e.g.
 #'   ```R  
@@ -132,7 +132,7 @@ bd_as_row <- function(event_str) {
 
 #' create a table of all the people who have been boren/ died on this day.
 #'
-#' @param events_list 
+#' @param events_list list of birth/death event strings
 #'
 #' @return tibble of births and deaths on this day
 #' @export
