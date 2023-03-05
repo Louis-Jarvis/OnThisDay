@@ -1,7 +1,10 @@
+![pkg logo](OnThisDay%20logo.png%22)
 
 # OnThisDay
 
+
 <!-- badges: start -->
+
 <!-- badges: end -->
 
 The goal of OnThisDay is to ...
@@ -22,4 +25,3 @@ This is a basic example which shows you how to solve a common problem:
 library(OnThisDay)
 ## basic example code
 ```
-
