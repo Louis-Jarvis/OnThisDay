@@ -42,8 +42,56 @@ create_events_table <- function(events_list) {
   return(event_tbl)
 }
 
-extract_birthdays
+extract_birthdays <- function(events_list) {
+  
+  #browser()
+  last_pos <- length(events_list)
+  
+  # convert the string into a list of birth and deaths
+  bday_str <- events_list[last_pos] %>% 
+    stringr::str_replace_all(pattern = "\\)", replacement = "\\)\\n") %>%
+    stringr::str_split(pattern = "\\n")
+  
+  # # extract the birth/death date
+  # stringr::str_extract("Stephen III of Hungary  \\(b. 1172", pattern = "[bd]. \\d{4}") #TODO fix
+  # 
+  # # determine birth or death
+  # birth_or_death <- ifelse(grepl(pattern = ".b"), "Born On This Day", "Died On This Day")
+  # 
+  # name <- stringr::str_split(s, "\\(") %>% 
+  #   purrr::pluck(1) %>% 
+  #   stringr::str_trim()
+  # 
+  # tibble::tibble(
+  #   Person = name,
+  #   Event = birth_or_death
+  # )
+  
+  return(bday_str)
+}
 
+birthdays_to_table <- function(event_str) {
+  # extract the birth/death date
+  stringr::str_extract(event_str, pattern = "[bd]. \\d{4}") #TODO fix
+  
+  # determine birth or death
+  birth_or_death <- ifelse(
+    grepl(event_str, pattern = ".b"), 
+    "Born On This Day", 
+    "Died On This Day"
+    )
+  
+  name <- stringr::str_split(event_str, "\\(") %>% 
+    purrr::pluck(1) %>% 
+    stringr::str_trim()
+  
+  bday_tbl <- tibble::tibble(
+    Person = name,
+    Event = birth_or_death
+  )
+  
+  return(bday_tbl)
+}
 
 #TODO wrap in a try execpt
 
@@ -71,6 +119,7 @@ read_wiki_html <- function() {
 # pull out the date
 #date_day <- today_list_vec[1]
 
+#TODO add args to specify which outputs are wanted
 get_daily_facts <- function() {
   events_list <- read_wiki_html() %>%
     text_to_vec()
