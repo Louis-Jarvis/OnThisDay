@@ -101,6 +101,25 @@ birth_deaths_to_tbl <- function(event_str) {
   return(bday_tbl)
 }
 
+
+
+#' create a table of all the people who have been boren/ died on this day.
+#'
+#' @param events_list 
+#'
+#' @return tibble of births and deaths on this day
+#' @export
+create_births_deaths_table <- function(events_list) {
+  
+  bd_tbl <- events_list %>% 
+    extract_birth_deaths() %>%
+    purrr::map(.f = birth_deaths_to_tbl) %>%
+    dplyr::bind_rows() 
+  
+  return(bd_tbl)
+}
+
+
 #TODO wrap in a try execpt
 
 #' Read in Wikipedia html and convert to string
@@ -127,8 +146,8 @@ read_wiki_html <- function() {
 #' @export
 #'
 get_daily_facts <- function() {
-  events_list <- read_wiki_html() %>%
-    text_to_vec()
+  
+  events_list <- read_wiki_html() %>% text_to_vec()
   
   cli::cli_h1("Guess What Happened On This Day!")
   ##print(glue::glue("{events_list[1]} {substr(Sys.Date(), 1, 4)}"))
@@ -138,21 +157,17 @@ get_daily_facts <- function() {
   ##TODO print the festival string
   
   cli::cli_h2("On This Day...")
-  
-  events_tbl <- events_list %>% 
-    create_events_table() 
+  events_tbl <- events_list %>% create_events_table() 
   
   print(events_tbl)
   cli::cli_text("")
   
   cli::cli_h2("Famous People")
-  
-  famous_ppl_tbl <- events_list %>% 
-    extract_birth_deaths() %>%
-    purrr::map(.f = birth_deaths_to_tbl) %>%
-    dplyr::bind_rows()
+  famous_ppl_tbl <- events_list %>% create_births_deaths_table()
   
   print(famous_ppl_tbl)
+  
+  #TODO return URL as clickable link
   
   return(invisible(NULL))
 }
