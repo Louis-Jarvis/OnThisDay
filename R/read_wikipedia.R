@@ -8,7 +8,7 @@
 ##TODO use global config to set defaults
 
 
-
+#TODO write a function to get historic ones
 
 #TODO wrap in a try execpt
 
