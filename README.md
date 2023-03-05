@@ -1,4 +1,6 @@
-<img src="OnThisDay logo.png"/>
+<div style="text-align:center">
+  <img src="OnThisDay-logo.png" width="25%"/>
+</div>
 
 # OnThisDay
 
