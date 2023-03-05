@@ -49,17 +49,35 @@ get_daily_facts <- function() {
   cli::cli_h2(cli::col_cyan("On This Day..."))
   events_tbl <- events_list %>% create_events_table() 
   
-  print(events_tbl)
-  cli::cli_text("")
+  #print(events_tbl)
+  tbl_to_list(events_tbl, title_col = "Year", text_col = "Details")
+  #cli::cli_text("")
   
   cli::cli_h2(cli::col_cyan("Famous People"))
   famous_ppl_tbl <- events_list %>% create_births_deaths_table()
   
-  print(famous_ppl_tbl)
+  #print(famous_ppl_tbl)
+  tbl_to_list(famous_ppl_tbl, title_col = "Person", text_col = "Event")
   
   #TODO return URL as clickable link
   
   return(invisible(NULL))
 }
+
+
+tbl_to_list <- function(event_tbl, title_col = "Year", text_col = "Details"){
   
+  lid <- cli::cli_ul()
+  
+  for (i in seq_len(nrow(event_tbl))) {
+    yr = event_tbl[i, title_col]
+    txt = event_tbl[i, text_col]
+    
+    cli::cli_li(cli::style_italic(cli::col_yellow(paste0("\t",yr))))
+    cli::cli_text(txt)
+    cli::cli_par()
+  }
+  
+  cli::cli_end(lid)
+}
 
