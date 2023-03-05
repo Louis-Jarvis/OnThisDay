@@ -34,6 +34,7 @@ events_to_table <- function(event_str) {
 #' @export
 create_events_table <- function(events_list) {
   
+  #browser()
   event_tbl <- events_list %>%
     base::Filter(f = function(x) stringr::str_detect(x, pattern = "\\d{4} – ")) %>%
     purrr::map_df(.f = events_to_table) %>%
@@ -42,15 +43,18 @@ create_events_table <- function(events_list) {
   return(event_tbl)
 }
 
-extract_birthdays <- function(events_list) {
+extract_birth_deaths <- function(events_list) {
   
   #browser()
   last_pos <- length(events_list)
   
   # convert the string into a list of birth and deaths
-  bday_str <- events_list[last_pos] %>% 
-    stringr::str_replace_all(pattern = "\\)", replacement = "\\)\\n") %>%
-    stringr::str_split(pattern = "\\n")
+  persons_list <- events_list[last_pos] %>% 
+    #stringr::str_replace_all(pattern = "\\)", replacement = "\\)\\n") %>%
+    stringr::str_split(pattern = "\\)") %>% 
+    purrr::pluck(1) %>% 
+    as.list() %>%
+    base::Filter(f = function(line) dplyr::if_else(line == "", F, T), x = .) 
   
   # # extract the birth/death date
   # stringr::str_extract("Stephen III of Hungary  \\(b. 1172", pattern = "[bd]. \\d{4}") #TODO fix
@@ -67,10 +71,10 @@ extract_birthdays <- function(events_list) {
   #   Event = birth_or_death
   # )
   
-  return(bday_str)
+  return(persons_list)
 }
 
-birthdays_to_table <- function(event_str) {
+birth_deaths_to_tbl <- function(event_str) {
   # extract the birth/death date
   stringr::str_extract(event_str, pattern = "[bd]. \\d{4}") #TODO fix
   
@@ -82,7 +86,7 @@ birthdays_to_table <- function(event_str) {
     )
   
   name <- stringr::str_split(event_str, "\\(") %>% 
-    purrr::pluck(1) %>% 
+    purrr::pluck(1,1) %>% 
     stringr::str_trim()
   
   bday_tbl <- tibble::tibble(
@@ -124,17 +128,34 @@ get_daily_facts <- function() {
   events_list <- read_wiki_html() %>%
     text_to_vec()
   
-  cli::cli_h1("Todays's date")
-  date_day <- events_list[1]
+  cli::cli_h1("Guess What Happened On This Day!")
+  ##print(glue::glue("{events_list[1]} {substr(Sys.Date(), 1, 4)}"))
+  
+  cli::cli_h2("Festivals / National Days of Importance / Holidays")
+  cli::cli_text(events_list[1])
+  ##TODO print the festival string
   
   cli::cli_h2("On This Day...")
+  
   events_tbl <- events_list %>% 
     create_events_table() 
   
   print(events_tbl)
-  cli::cli_par()
+  cli::cli_text("")
   
-  cli::cli_h1("Famous Births and Deaths")
+  #cli::cli_par()
+  cli::cli_h2("Famous People")
+  #cli::cli_par()
+  #cli::cli_end()
+  
+  #browser()
+  famous_ppl_tbl <- events_list %>% 
+    extract_birth_deaths() %>%
+    purrr::map(.f = birth_deaths_to_tbl) %>%
+    dplyr::bind_rows()
+  
+  print(famous_ppl_tbl)
+  
 }
   
 
