@@ -39,7 +39,7 @@ get_daily_facts <- function() {
   
   events_list <- read_wiki_html() %>% text_to_event_list()
   
-  cli::cli_h1(cli::col_green("Guess What Happened On This Day!"))
+  cli::cli_h1(cli::col_green("Guess What Happened On This Very Day!"))
   ##print(glue::glue("{events_list[1]} {substr(Sys.Date(), 1, 4)}"))
   
   cli::cli_h2(cli::col_cyan("Festivals / National Days of Importance / Holidays"))
@@ -60,10 +60,16 @@ get_daily_facts <- function() {
   tbl_to_list(famous_ppl_tbl, title_col = "Person", text_col = "Event")
   
   #TODO return URL as clickable link
+  cli::cli_text("See for yourself at {.url https://en.wikipedia.org/wiki/Main_Page}")
+  
+  d <- cli::cli_div(theme = list(rule = list(color = "cyan")))
+  cli::cli_rule("")
+  cli::cli_end(d)
   
   return(invisible(NULL))
 }
 
+#TODO add skull or baby emoji for birth/death
 
 tbl_to_list <- function(event_tbl, title_col = "Year", text_col = "Details"){
   
