@@ -43,6 +43,13 @@ create_events_table <- function(events_list) {
   return(event_tbl)
 }
 
+
+#' Extract out the births/deaths string as a list - one element per person
+#'
+#' @param events_list list of characters
+#'
+#' @return list of characters
+#' @export
 extract_birth_deaths <- function(events_list) {
     last_pos <- length(events_list)
   
@@ -57,7 +64,19 @@ extract_birth_deaths <- function(events_list) {
 }
 
 
+#' Convert birth/death event to tibble row
+#'
+#' @param event_str 
+#'
+#' @return tibble with columns Person, Event e.g.
+#'   ```R  
+#'   Person             Event           
+#'   Gerardus           Mercator Born On This Day`
+#'   Alessandro Volta   Died On This Day
+#'  ````
+#' @export
 birth_deaths_to_tbl <- function(event_str) {
+  
   # extract the birth/death date
   stringr::str_extract(event_str, pattern = "[bd]. \\d{4}") #TODO fix
   
@@ -67,6 +86,8 @@ birth_deaths_to_tbl <- function(event_str) {
     "Born On This Day", 
     "Died On This Day"
     )
+  
+  #TODO determine year or birth/death
   
   name <- stringr::str_split(event_str, "\\(") %>% 
     purrr::pluck(1,1) %>% 
@@ -86,7 +107,6 @@ birth_deaths_to_tbl <- function(event_str) {
 #'
 #' @return character vector with all the wikipedia contents
 #' @export
-
 read_wiki_html <- function() {
   main_page <- rvest::read_html("https://en.wikipedia.org/wiki/Main_Page")
   
@@ -98,6 +118,14 @@ read_wiki_html <- function() {
 }
 
 #TODO add args to specify which outputs are wanted
+#TODO convert dfs into cli_ unordered list
+
+
+#' Grab daily facts from "https://en.wikipedia.org/wiki/Main_Page" and print out
+#'
+#' @return NULL
+#' @export
+#'
 get_daily_facts <- function() {
   events_list <- read_wiki_html() %>%
     text_to_vec()
@@ -126,6 +154,7 @@ get_daily_facts <- function() {
   
   print(famous_ppl_tbl)
   
+  return(invisible(NULL))
 }
   
 
