@@ -22,7 +22,7 @@ drop_more_anniveraries <- function(paragraph_str) {
 #'
 #' @return list of characters, each a different sentence
 #' @export
-text_to_vec <- function(today_list_str) {
+text_to_event_list <- function(today_list_str) {
   
   # this stops multiple sentences being put on the same line e.g. 
   # foo.Bar -- > foo.\nBar, which can then be split into multiple lines
@@ -41,7 +41,6 @@ text_to_vec <- function(today_list_str) {
   return(today_list_vec)
 }
 
-
 #TODO coloured output for df
 
 #' Convert the yyyy - event pairs into tibble rows
@@ -50,7 +49,7 @@ text_to_vec <- function(today_list_str) {
 #' e.g. 2012 – A series of blasts occurred at an arms dump ...
 #'
 #' @return a dataframe with columns: `Year` `and Details``
-events_to_table <- function(event_str) {
+events_as_row <- function(event_str) {
   
   event_row <- tibble::tibble(
     Year = stringr::str_extract(event_str, pattern = '(\\d{4})'), 
@@ -68,22 +67,20 @@ events_to_table <- function(event_str) {
 #' @export
 create_events_table <- function(events_list) {
   
-  #browser()
   event_tbl <- events_list %>%
     base::Filter(f = function(x) stringr::str_detect(x, pattern = "\\d{4} – ")) %>%
-    purrr::map_df(.f = events_to_table) %>%
+    purrr::map_df(.f = events_as_row) %>%
     dplyr::bind_rows() 
   
   return(event_tbl)
 }
 
-
-#' Extract out the births/deaths string as a list - one element per person
+#' Extract out the births/deaths string as a list - one element per person + date
 #'
 #' @param events_list list of characters
 #'
 #' @return list of characters
-extract_birth_deaths <- function(events_list) {
+to_bd_list <- function(events_list) {
   last_pos <- length(events_list)
   
   # convert the string into a list of birth and deaths
@@ -96,7 +93,6 @@ extract_birth_deaths <- function(events_list) {
   return(persons_list)
 }
 
-
 #' Convert birth/death event to tibble row
 #'
 #' @param event_str 
@@ -107,7 +103,7 @@ extract_birth_deaths <- function(events_list) {
 #'   Gerardus           Mercator Born On This Day`
 #'   Alessandro Volta   Died On This Day
 #'  ````
-birth_deaths_to_tbl <- function(event_str) {
+bd_as_row <- function(event_str) {
   
   # extract the birth/death date
   stringr::str_extract(event_str, pattern = "[bd]. \\d{4}") #TODO fix
@@ -134,7 +130,6 @@ birth_deaths_to_tbl <- function(event_str) {
 }
 
 
-
 #' create a table of all the people who have been boren/ died on this day.
 #'
 #' @param events_list 
@@ -144,8 +139,8 @@ birth_deaths_to_tbl <- function(event_str) {
 create_births_deaths_table <- function(events_list) {
   
   bd_tbl <- events_list %>% 
-    extract_birth_deaths() %>%
-    purrr::map(.f = birth_deaths_to_tbl) %>%
+    to_bd_list() %>%
+    purrr::map(.f = bd_as_row) %>%
     dplyr::bind_rows() 
   
   return(bd_tbl)

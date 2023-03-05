@@ -37,7 +37,7 @@ read_wiki_html <- function() {
 #'
 get_daily_facts <- function() {
   
-  events_list <- read_wiki_html() %>% text_to_vec()
+  events_list <- read_wiki_html() %>% text_to_event_list()
   
   cli::cli_h1("Guess What Happened On This Day!")
   ##print(glue::glue("{events_list[1]} {substr(Sys.Date(), 1, 4)}"))
