@@ -15,6 +15,7 @@ Imports:
     magrittr,
     purrr,
     rvest,
+    stringi,
     stringr,
     tibble
 Suggests: 
