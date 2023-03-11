@@ -44,7 +44,8 @@ read_wiki_html <- function(wiki_date = NULL) {
     events_str <- main_page %>% rvest::html_element(".mw-body-content.mw-content-ltr .mw-parser-output > ul") %>% rvest::html_text()
     ppl_str <- main_page %>% rvest::html_elements(".mw-body-content.mw-content-ltr .mw-parser-output > .hlist") %>% rvest::html_text()
     
-    today_list_str <- c(days_str, events_str, ppl_str)
+    today_list_str <- c(days_str, events_str, ppl_str) %>%
+      stringi::stri_enc_toascii()
     
   } else {
     
@@ -52,7 +53,8 @@ read_wiki_html <- function(wiki_date = NULL) {
     
     today_list_str <- main_page %>% 
       rvest::html_element("#mp-otd") %>% # use css selectors to obtain div
-      rvest::html_text() 
+      rvest::html_text() %>%
+      stringi::stri_enc_toascii()
   }
   
   return(today_list_str)
@@ -81,14 +83,14 @@ get_daily_facts <- function(wiki_date) {
   if(!is.na(national_days)) {
     cli::cli_h2(cli::col_cyan("Festivals / National Days of Importance / Holidays"))  
     
-    nat_days_list <- stringr::str_split(national_days, pattern = ";")[[1]] %>% stringr::str_squish()
-    ulid <- cli::cli_ul()
+    nat_days_list <- stringr::str_split(national_days, pattern = ";")[[1]] %>% 
+      stringr::str_squish()
     
+    ulid <- cli::cli_ul()
     for (day in nat_days_list) {
       cli::cli_li(day) 
     }
     cli::cli_end(ulid)
-    
   }
   
   ## Historiocal Events
