@@ -50,10 +50,10 @@ text_to_event_list <- function(today_list_str) {
 #'
 #' @return a dataframe with columns: `Year` `and Details``
 events_as_row <- function(event_str) {
-  
+ 
   event_row <- tibble::tibble(
     Year = stringr::str_extract(event_str, pattern = '(\\d{4})'), 
-    Details = stringr::str_split(event_str, pattern = " - ")[[1]][2]
+    Details = stringr::str_split(event_str, pattern = " \032 ")[[1]][2]
   )
   
   return(event_row)
@@ -68,7 +68,7 @@ events_as_row <- function(event_str) {
 create_events_table <- function(events_list) {
   
   event_tbl <- events_list %>%
-    base::Filter(f = function(x) stringr::str_detect(x, pattern = "\\d{4} - ")) %>%
+    base::Filter(f = function(x) stringr::str_detect(x, pattern = "\\d{4} ")) %>%
     purrr::map_df(.f = events_as_row) %>%
     dplyr::bind_rows() 
   
@@ -106,14 +106,16 @@ to_bd_list <- function(events_list) {
 bd_as_row <- function(event_str) {
   
   # extract the birth/death date
-  stringr::str_extract(event_str, pattern = "[bd]. \\d{4}") #TODO fix
+  #stringr::str_extract(event_str, pattern = "[bd]. \\d{4}") #TODO fix
   
   # determine birth or death
   birth_or_death <- ifelse(
     grepl(event_str, pattern = ".b"), 
-    "Born On This Day", 
-    "Died On This Day"
+    cli::col_br_green("Born"), 
+    cli::col_br_red("Died On This Day")
   )
+  
+  dob <- stringr::str_extract(event_str, pattern = "\\d{4}")
   
   #TODO determine year or birth/death
   
@@ -123,7 +125,7 @@ bd_as_row <- function(event_str) {
   
   bday_tbl <- tibble::tibble(
     Person = name,
-    Event = birth_or_death
+    Event = paste(birth_or_death, "-", dob)
   )
   
   return(bday_tbl)
