@@ -23,18 +23,14 @@ read_wiki_html <- function(wiki_date = NULL) {
     num_str <- stringr::str_extract(wiki_date, "[[:digit:]]+")
     mnth_str <- stringr::str_extract(wiki_date, paste(month.name, collapse="|"))
     
-    assertthat::assert_that((num_str < 31 && num_str > 0), msg = "Day entered must be in the range 0-31")
-    assertthat::assert_that(!is.na(as.integer(num_str)), msg = "Day entered must be an integer")
-    assertthat::assert_that(
-      (stringr::str_to_title(mnth_str) %in% month.name) || 
-        (stringr::str_to_title(mnth_str) %in% month.abb), 
-      msg = "Invalid month entered"
-    )
+   if(isFALSE(stringr::str_to_title(mnth_str) %in% month.name) || isFALSE(stringr::str_to_title(mnth_str) %in% month.abb)) {
+     cli::cli_alert_danger("Invalid Month")
+   }
     
     num_str <- as.integer(num_str)
     mnth_str <- stringr::str_to_title(mnth_str)
     
-    # https://stackoverflow.com/questions/13450360/how-to-validate-date-in-r
+    # see https://stackoverflow.com/questions/13450360/how-to-validate-date-in-r
     d <- try(as.Date(wiki_date, format="%d %B"))
     if("try-error" %in% class(d) || is.na(d)) {
       cli::cli_alert_danger("Invalid Input: {num_str} {mnth_str} is not a real date!")
