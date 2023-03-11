@@ -39,12 +39,22 @@ get_daily_facts <- function() {
   
   events_list <- read_wiki_html() %>% text_to_event_list()
   
-  cli::cli_h1(cli::col_green("Guess What Happened On This Very Day!"))
+  cli::cli_h1(cli::col_green("Guess What Happened On This Day!"))
   ##print(glue::glue("{events_list[1]} {substr(Sys.Date(), 1, 4)}"))
   
-  cli::cli_h2(cli::col_cyan("Festivals / National Days of Importance / Holidays"))
-  cli::cli_text(events_list[1])
-  ##TODO print the festival string
+  national_days <- stringr::str_split(events_list[1], pattern = ":")[[1]][2]
+  if(!is.na(national_days)) {
+    cli::cli_h2(cli::col_cyan("Festivals / National Days of Importance / Holidays"))  
+    
+    nat_days_list <- stringr::str_split(national_days, pattern = ";")[[1]] %>% stringr::str_squish()
+    ulid <- cli::cli_ul()
+    
+    for (day in nat_days_list) {
+      cli::cli_li(day) 
+    }
+    cli::cli_end(ulid)
+    
+  }
   
   cli::cli_h2(cli::col_cyan("On This Day..."))
   events_tbl <- events_list %>% create_events_table() 
