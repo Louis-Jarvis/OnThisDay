@@ -1,6 +1,4 @@
-<div style="text-align:center">
-  <img src="OnThisDay-logo.png" width="25%"/>
-</div>
+<img src="man/figures/logo.png" align="right" height="105"/>
 
 # OnThisDay
 
