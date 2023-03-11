@@ -56,18 +56,26 @@ get_daily_facts <- function() {
     
   }
   
-  cli::cli_h2(cli::col_cyan("On This Day..."))
+  #browser()
   events_tbl <- events_list %>% create_events_table() 
+  if(nrow(events_tbl) > 0) {
+    cli::cli_h2(cli::col_cyan("On This Day..."))
+    tbl_to_ul_output(events_tbl, title_col = "Year", text_col = "Details")
+  }
   
   #print(events_tbl)
-  tbl_to_list(events_tbl, title_col = "Year", text_col = "Details")
+  tbl_to_ul_output(events_tbl, title_col = "Year", text_col = "Details")
   #cli::cli_text("")
-  
-  cli::cli_h2(cli::col_cyan("Famous People"))
   famous_ppl_tbl <- events_list %>% create_births_deaths_table()
   
+  if(nrow(famous_ppl_tbl) > 0) {
+    cli::cli_h2(cli::col_cyan("Famous Births/Deaths"))
+    tbl_to_ul_output(famous_ppl_tbl, title_col = "Person", text_col = "Event")
+  }
+  #cli::cli_h2(cli::col_cyan("Famous Births/Deaths"))
+  
   #print(famous_ppl_tbl)
-  tbl_to_list(famous_ppl_tbl, title_col = "Person", text_col = "Event")
+  #tbl_to_ul_output(famous_ppl_tbl, title_col = "Person", text_col = "Event")
   
   #TODO return URL as clickable link
   cli::cli_text("See for yourself at {.url https://en.wikipedia.org/wiki/Main_Page}")
@@ -81,7 +89,7 @@ get_daily_facts <- function() {
 
 #TODO add skull or baby emoji for birth/death
 
-tbl_to_list <- function(event_tbl, title_col = "Year", text_col = "Details"){
+tbl_to_ul_output <- function(event_tbl, title_col = "Year", text_col = "Details"){
   
   lid <- cli::cli_ul()
   
