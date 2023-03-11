@@ -3,7 +3,7 @@
 # OnThisDay
 
 <!-- badges: start -->
-
+[![R-CMD-check](https://github.com/Louis-Jarvis/OnThisDay/actions/workflows/check-release.yaml/badge.svg)](https://github.com/Louis-Jarvis/OnThisDay/actions/workflows/check-release.yaml)
 <!-- badges: end -->
 
 The goal of OnThisDay is to Scrape Wikipedia's "On This Day" section and return a summary of the events.
