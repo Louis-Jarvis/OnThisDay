@@ -69,7 +69,7 @@ read_wiki_html <- function(wiki_date = NULL) {
 #' @return NULL
 #' @export
 #'
-get_daily_facts <- function(wiki_date) {
+get_daily_facts <- function(wiki_date = NULL) {
   
   events_list <- read_wiki_html(wiki_date) %>% text_to_event_list()
   
