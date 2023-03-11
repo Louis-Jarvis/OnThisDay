@@ -23,7 +23,7 @@ read_wiki_html <- function(wiki_date = NULL) {
     num_str <- stringr::str_extract(wiki_date, "[[:digit:]]+")
     mnth_str <- stringr::str_extract(wiki_date, paste(month.name, collapse="|"))
     
-   if(isFALSE(stringr::str_to_title(mnth_str) %in% month.name) || isFALSE(stringr::str_to_title(mnth_str) %in% month.abb)) {
+   if(isFALSE(stringr::str_to_title(mnth_str) %in% month.name) && isFALSE(stringr::str_to_title(mnth_str) %in% month.abb)) {
      cli::cli_alert_danger("Invalid Month")
    }
     
@@ -31,21 +31,29 @@ read_wiki_html <- function(wiki_date = NULL) {
     mnth_str <- stringr::str_to_title(mnth_str)
     
     # see https://stackoverflow.com/questions/13450360/how-to-validate-date-in-r
-    d <- try(as.Date(wiki_date, format="%d %B"))
+    d <- try(as.Date(paste(num_str, mnth_str), format="%d %B"))
     if("try-error" %in% class(d) || is.na(d)) {
       cli::cli_alert_danger("Invalid Input: {num_str} {mnth_str} is not a real date!")
     }
     
     cli::cli_text("Retrieving info for: {.field {num_str} {mnth_str}}")
     
-    main_page <- rvest::read_html(glue::glue("https://en.wikipedia.org/wiki/Wikipedia:Selected_anniversaries/{mnth_str}_{num_str}")) 
+
+    main_page <- rvest::read_html(glue::glue("https://en.wikipedia.org/wiki/Wikipedia:Selected_anniversaries/{mnth_str}_{num_str}"))
+    days_str <- main_page %>% rvest::html_element(".mw-body-content.mw-content-ltr .mw-parser-output > p") %>% rvest::html_text()
+    events_str <- main_page %>% rvest::html_element(".mw-body-content.mw-content-ltr .mw-parser-output > ul") %>% rvest::html_text()
+    ppl_str <- main_page %>% rvest::html_elements(".mw-body-content.mw-content-ltr .mw-parser-output > .hlist") %>% rvest::html_text()
+    
+    today_list_str <- c(days_str, events_str, ppl_str)
+    
+  } else {
+    
+    main_page <- rvest::read_html("https://en.wikipedia.org/wiki/Main_Page")
+    
+    today_list_str <- main_page %>% 
+      rvest::html_element("#mp-otd") %>% # use css selectors to obtain div
+      rvest::html_text() 
   }
-  
-  main_page <- rvest::read_html("https://en.wikipedia.org/wiki/Main_Page")
-  
-  today_list_str <- main_page %>% 
-    rvest::html_element("#mp-otd") %>% # use css selectors to obtain div
-    rvest::html_text() 
   
   return(today_list_str)
 }
