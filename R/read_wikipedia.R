@@ -39,10 +39,13 @@ get_daily_facts <- function() {
   
   events_list <- read_wiki_html() %>% text_to_event_list()
   
+  # Current Date
   cli::cli_h1(cli::col_green(glue::glue("Guess What Happened On {format(Sys.Date(),'%B %d')}!")))
   cli::cli_text(paste("Today's Date:", cli::style_italic(format(Sys.Date(),"%A %d %B %Y"))))
   
+  ## National Holidays
   national_days <- stringr::str_split(events_list[1], pattern = ":")[[1]][2]
+  
   if(!is.na(national_days)) {
     cli::cli_h2(cli::col_cyan("Festivals / National Days of Importance / Holidays"))  
     
@@ -56,19 +59,23 @@ get_daily_facts <- function() {
     
   }
   
+  ## Historiocal Events
   events_tbl <- events_list %>% create_events_table()
-  
-  if(nrow(events_tbl) > 0) {
-    cli::cli_h2(cli::col_cyan("On This Day..."))
-    tbl_to_ul_output(events_tbl, title_col = "Year", text_col = "Details")
-  }
+  tbl_to_ul_output(
+    events_tbl, 
+    header_text = "On This Day...", 
+    title_col = "Year", 
+    text_col = "Details"
+    )
 
+  ## Famous Figures
   famous_ppl_tbl <- events_list %>% create_births_deaths_table()
-  
-  if(nrow(famous_ppl_tbl) > 0) {
-    cli::cli_h2(cli::col_cyan("Famous Births/Deaths"))
-    tbl_to_ul_output(famous_ppl_tbl, title_col = "Person", text_col = "Event")
-  }
+  tbl_to_ul_output(
+    famous_ppl_tbl, 
+    header_text = "Famous Births/Deaths", 
+    title_col = "Person", 
+    text_col = "Event"
+    )
   
   cli::cli_text("See for yourself at {.url https://en.wikipedia.org/wiki/Main_Page}")
   
@@ -81,7 +88,11 @@ get_daily_facts <- function() {
 
 #TODO add skull or baby emoji for birth/death
 
-tbl_to_ul_output <- function(event_tbl, title_col = "Year", text_col = "Details"){
+tbl_to_ul_output <- function(event_tbl, header_text, title_col = "Year", text_col = "Details"){
+  
+  if(nrow(event_tbl) > 0) {
+    cli::cli_h2(cli::col_cyan(header_text))
+  }
   
   lid <- cli::cli_ul()
   
