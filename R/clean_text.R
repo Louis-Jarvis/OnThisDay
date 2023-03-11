@@ -10,6 +10,8 @@ drop_more_anniveraries <- function(paragraph_str) {
     stringr::str_locate(pattern = "More anniversaries") %>% 
     purrr::pluck(1)
   
+  if(is.na(anni_start)) return(paragraph_str)
+  
   str_stripped <- paragraph_str %>% 
     stringr::str_sub(start = 1, end = anni_start-1) 
   
@@ -26,7 +28,7 @@ text_to_event_list <- function(today_list_str) {
   
   # this stops multiple sentences being put on the same line e.g. 
   # foo.Bar -- > foo.\nBar, which can then be split into multiple lines
-  
+
   today_list_vec <- today_list_str %>%
     drop_more_anniveraries() %>%
     stringr::str_replace(
@@ -35,7 +37,7 @@ text_to_event_list <- function(today_list_str) {
       replacement = ".\n"
     ) %>%
     stringr::str_split(pattern = "\n") %>%
-    purrr::pluck(1) %>%
+    unlist() %>%
     base::Filter(f = function(line) dplyr::if_else(line == "", F, T), x = .) 
   
   return(today_list_vec)
