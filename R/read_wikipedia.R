@@ -39,8 +39,8 @@ get_daily_facts <- function() {
   
   events_list <- read_wiki_html() %>% text_to_event_list()
   
-  cli::cli_h1(cli::col_green("Guess What Happened On This Day!"))
-  ##print(glue::glue("{events_list[1]} {substr(Sys.Date(), 1, 4)}"))
+  cli::cli_h1(cli::col_green(glue::glue("Guess What Happened On {format(Sys.Date(),'%B %d')}!")))
+  cli::cli_text(paste("Today's Date:", cli::style_italic(format(Sys.Date(),"%A %d %B %Y"))))
   
   national_days <- stringr::str_split(events_list[1], pattern = ":")[[1]][2]
   if(!is.na(national_days)) {
@@ -56,28 +56,20 @@ get_daily_facts <- function() {
     
   }
   
-  #browser()
-  events_tbl <- events_list %>% create_events_table() 
+  events_tbl <- events_list %>% create_events_table()
+  
   if(nrow(events_tbl) > 0) {
     cli::cli_h2(cli::col_cyan("On This Day..."))
     tbl_to_ul_output(events_tbl, title_col = "Year", text_col = "Details")
   }
-  
-  #print(events_tbl)
-  tbl_to_ul_output(events_tbl, title_col = "Year", text_col = "Details")
-  #cli::cli_text("")
+
   famous_ppl_tbl <- events_list %>% create_births_deaths_table()
   
   if(nrow(famous_ppl_tbl) > 0) {
     cli::cli_h2(cli::col_cyan("Famous Births/Deaths"))
     tbl_to_ul_output(famous_ppl_tbl, title_col = "Person", text_col = "Event")
   }
-  #cli::cli_h2(cli::col_cyan("Famous Births/Deaths"))
   
-  #print(famous_ppl_tbl)
-  #tbl_to_ul_output(famous_ppl_tbl, title_col = "Person", text_col = "Event")
-  
-  #TODO return URL as clickable link
   cli::cli_text("See for yourself at {.url https://en.wikipedia.org/wiki/Main_Page}")
   
   d <- cli::cli_div(theme = list(rule = list(color = "cyan")))
