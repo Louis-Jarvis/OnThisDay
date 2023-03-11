@@ -21,7 +21,8 @@ read_wiki_html <- function() {
   
   today_list_str <- main_page %>% 
     rvest::html_element("#mp-otd") %>% # use css selectors to obtain div
-    rvest::html_text() 
+    rvest::html_text() %>%
+    stringi::stri_enc_toascii()
   
   return(today_list_str)
 }
