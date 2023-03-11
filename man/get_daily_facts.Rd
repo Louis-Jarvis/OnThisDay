@@ -4,7 +4,10 @@
 \alias{get_daily_facts}
 \title{Grab daily facts from "https://en.wikipedia.org/wiki/Main_Page" and print out}
 \usage{
-get_daily_facts()
+get_daily_facts(wiki_date)
+}
+\arguments{
+\item{wiki_date}{str in the format \%d \%B specifying the date of the archived article to retrieve}
 }
 \description{
 Grab daily facts from "https://en.wikipedia.org/wiki/Main_Page" and print out

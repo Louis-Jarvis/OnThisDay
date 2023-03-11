@@ -4,7 +4,10 @@
 \alias{read_wiki_html}
 \title{Read in Wikipedia html and convert to string}
 \usage{
-read_wiki_html()
+read_wiki_html(wiki_date = NULL)
+}
+\arguments{
+\item{wiki_date}{str in the format \%d \%B specifying the date of the archived article to retrieve}
 }
 \value{
 character vector with all the wikipedia contents
