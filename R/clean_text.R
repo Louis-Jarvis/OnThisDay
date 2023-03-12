@@ -4,10 +4,14 @@
 #'
 #' @return a string with all text between "More anniversaries" and the end excluded
 #' @export
-drop_more_anniveraries <- function(paragraph_str) {
+#' 
+
+
+##TODO make this more generic
+drop_more_anniveraries <- function(paragraph_str, pattern) {
   
   anni_start <- paragraph_str %>% 
-    stringr::str_locate(pattern = "More anniversaries") %>% 
+    stringr::str_locate(pattern) %>% 
     purrr::pluck(1)
   
   if(is.na(anni_start)) return(paragraph_str)
@@ -30,7 +34,8 @@ text_to_event_list <- function(today_list_str) {
   # foo.Bar -- > foo.\nBar, which can then be split into multiple lines
 
   today_list_vec <- today_list_str %>%
-    drop_more_anniveraries() %>%
+    drop_more_anniveraries(pattern = "More anniversaries") %>%
+    drop_more_anniveraries(pattern = "Archive") %>%
     stringr::str_replace(
       string = .,
       pattern = "(?<=[a-z])\\.(?=[A-Z])",
@@ -114,7 +119,7 @@ bd_as_row <- function(event_str) {
   birth_or_death <- ifelse(
     grepl(event_str, pattern = ".b"), 
     cli::col_br_green("Born"), 
-    cli::col_br_red("Died On This Day")
+    cli::col_br_red("Died")
   )
   
   dob <- stringr::str_extract(event_str, pattern = "\\d{4}")
