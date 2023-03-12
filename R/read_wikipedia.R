@@ -45,6 +45,7 @@ read_wiki_html <- function(wiki_date = NULL) {
     ppl_str <- main_page %>% rvest::html_elements(".mw-body-content.mw-content-ltr .mw-parser-output > .hlist") %>% rvest::html_text()
     
     today_list_str <- c(days_str, events_str, ppl_str) %>%
+      paste0(collapse="") %>%
       stringi::stri_enc_toascii()
     
   } else {
