@@ -1,14 +1,12 @@
-#' Drop all text starting at "More anniversaries"
+#' Drop all text between start of word and end of the string
 #'
 #' @param paragraph_str character vector, the wikipedia page content as a single string
+#' @param pattern character expression to drop
 #'
 #' @return a string with all text between "More anniversaries" and the end excluded
 #' @export
 #' 
-
-
-##TODO make this more generic
-drop_more_anniveraries <- function(paragraph_str, pattern) {
+drop_substring <- function(paragraph_str, pattern) {
   
   anni_start <- paragraph_str %>% 
     stringr::str_locate(pattern) %>% 
@@ -34,8 +32,8 @@ text_to_event_list <- function(today_list_str) {
   # foo.Bar -- > foo.\nBar, which can then be split into multiple lines
 
   today_list_vec <- today_list_str %>%
-    drop_more_anniveraries(pattern = "More anniversaries") %>%
-    drop_more_anniveraries(pattern = "Archive") %>%
+    drop_substring(pattern = "More anniversaries") %>%
+    drop_substring(pattern = "Archive") %>%
     stringr::str_replace(
       string = .,
       pattern = "(?<=[a-z])\\.(?=[A-Z])",
