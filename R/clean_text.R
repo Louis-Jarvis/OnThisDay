@@ -1,14 +1,18 @@
-#' Drop all text starting at "More anniversaries"
+#' Drop all text between start of word and end of the string
 #'
 #' @param paragraph_str character vector, the wikipedia page content as a single string
+#' @param pattern character expression to drop
 #'
 #' @return a string with all text between "More anniversaries" and the end excluded
 #' @export
-drop_more_anniveraries <- function(paragraph_str) {
+#' 
+drop_substring <- function(paragraph_str, pattern) {
   
   anni_start <- paragraph_str %>% 
-    stringr::str_locate(pattern = "More anniversaries") %>% 
+    stringr::str_locate(pattern) %>% 
     purrr::pluck(1)
+  
+  if(is.na(anni_start)) return(paragraph_str)
   
   str_stripped <- paragraph_str %>% 
     stringr::str_sub(start = 1, end = anni_start-1) 
@@ -26,16 +30,17 @@ text_to_event_list <- function(today_list_str) {
   
   # this stops multiple sentences being put on the same line e.g. 
   # foo.Bar -- > foo.\nBar, which can then be split into multiple lines
-  
+
   today_list_vec <- today_list_str %>%
-    drop_more_anniveraries() %>%
+    drop_substring(pattern = "More anniversaries") %>%
+    drop_substring(pattern = "Archive") %>%
     stringr::str_replace(
       string = .,
       pattern = "(?<=[a-z])\\.(?=[A-Z])",
       replacement = ".\n"
     ) %>%
     stringr::str_split(pattern = "\n") %>%
-    purrr::pluck(1) %>%
+    unlist() %>%
     base::Filter(f = function(line) dplyr::if_else(line == "", F, T), x = .) 
   
   return(today_list_vec)
@@ -112,7 +117,7 @@ bd_as_row <- function(event_str) {
   birth_or_death <- ifelse(
     grepl(event_str, pattern = ".b"), 
     cli::col_br_green("Born"), 
-    cli::col_br_red("Died On This Day")
+    cli::col_br_red("Died")
   )
   
   dob <- stringr::str_extract(event_str, pattern = "\\d{4}")

@@ -44,7 +44,9 @@ read_wiki_html <- function(wiki_date = NULL) {
     events_str <- main_page %>% rvest::html_element(".mw-body-content.mw-content-ltr .mw-parser-output > ul") %>% rvest::html_text()
     ppl_str <- main_page %>% rvest::html_elements(".mw-body-content.mw-content-ltr .mw-parser-output > .hlist") %>% rvest::html_text()
     
-    today_list_str <- c(days_str, events_str, ppl_str)
+    today_list_str <- c(days_str, events_str, ppl_str) %>%
+      paste0(collapse="") %>%
+      stringi::stri_enc_toascii()
     
   } else {
     
@@ -52,7 +54,8 @@ read_wiki_html <- function(wiki_date = NULL) {
     
     today_list_str <- main_page %>% 
       rvest::html_element("#mp-otd") %>% # use css selectors to obtain div
-      rvest::html_text() 
+      rvest::html_text() %>%
+      stringi::stri_enc_toascii()
   }
   
   return(today_list_str)
@@ -67,31 +70,48 @@ read_wiki_html <- function(wiki_date = NULL) {
 #' @return NULL
 #' @export
 #'
-get_daily_facts <- function(wiki_date) {
+get_daily_facts <- function(wiki_date = NULL) {
   
   events_list <- read_wiki_html(wiki_date) %>% text_to_event_list()
   
-  cli::cli_h1(cli::col_green("Guess What Happened On This Very Day!"))
-  ##print(glue::glue("{events_list[1]} {substr(Sys.Date(), 1, 4)}"))
+  # Current Date
+  cli::cli_h1(cli::col_green(glue::glue("Guess What Happened On {format(Sys.Date(),'%B %d')}!")))
+  cli::cli_text(paste("Today's Date:", cli::style_italic(format(Sys.Date(),"%A %d %B %Y"))))
   
-  cli::cli_h2(cli::col_cyan("Festivals / National Days of Importance / Holidays"))
-  cli::cli_text(events_list[1])
-  ##TODO print the festival string
+  ## National Holidays
+  national_days <- stringr::str_split(events_list[1], pattern = ":")[[1]][2]
   
-  cli::cli_h2(cli::col_cyan("On This Day..."))
-  events_tbl <- events_list %>% create_events_table() 
+  if(!is.na(national_days)) {
+    cli::cli_h2(cli::col_cyan("Festivals / National Days of Importance / Holidays"))  
+    
+    nat_days_list <- stringr::str_split(national_days, pattern = ";")[[1]] %>% 
+      stringr::str_squish()
+    
+    ulid <- cli::cli_ul()
+    for (day in nat_days_list) {
+      cli::cli_li(day) 
+    }
+    cli::cli_end(ulid)
+  }
   
-  #print(events_tbl)
-  tbl_to_list(events_tbl, title_col = "Year", text_col = "Details")
-  #cli::cli_text("")
-  
-  cli::cli_h2(cli::col_cyan("Famous People"))
+  ## Historiocal Events
+  events_tbl <- events_list %>% create_events_table()
+  tbl_to_ul_output(
+    events_tbl, 
+    header_text = "On This Day...", 
+    title_col = "Year", 
+    text_col = "Details"
+    )
+
+  ## Famous Figures
   famous_ppl_tbl <- events_list %>% create_births_deaths_table()
+  tbl_to_ul_output(
+    famous_ppl_tbl, 
+    header_text = "Famous Births/Deaths", 
+    title_col = "Person", 
+    text_col = "Event"
+    )
   
-  #print(famous_ppl_tbl)
-  tbl_to_list(famous_ppl_tbl, title_col = "Person", text_col = "Event")
-  
-  #TODO return URL as clickable link
   cli::cli_text("See for yourself at {.url https://en.wikipedia.org/wiki/Main_Page}")
   
   d <- cli::cli_div(theme = list(rule = list(color = "cyan")))
@@ -103,7 +123,11 @@ get_daily_facts <- function(wiki_date) {
 
 #TODO add skull or baby emoji for birth/death
 
-tbl_to_list <- function(event_tbl, title_col = "Year", text_col = "Details"){
+tbl_to_ul_output <- function(event_tbl, header_text, title_col = "Year", text_col = "Details"){
+  
+  if(nrow(event_tbl) > 0) {
+    cli::cli_h2(cli::col_cyan(header_text))
+  }
   
   lid <- cli::cli_ul()
   
