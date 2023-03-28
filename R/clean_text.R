@@ -46,46 +46,12 @@ text_to_event_list <- function(today_list_str) {
   return(today_list_vec)
 }
 
-#TODO coloured output for df
-
-#' Convert the yyyy - event pairs into tibble rows
-#'
-#' @param event_str list of character vectors, each containing a yyyy - event pair
-#' e.g. 2012 - A series of blasts occurred at an arms dump ...
-#'
-#' @return a dataframe with columns: `Year` `and Details``
-events_as_row <- function(event_str) {
- 
-  event_row <- tibble::tibble(
-    Year = stringr::str_extract(event_str, pattern = '(\\d{4})'), 
-    Details = stringr::str_split(event_str, pattern = " \032 ")[[1]][2]
-  )
-  
-  return(event_row)
-}
-
-#' Convert list of strings into a tibble of events and details
-#'
-#' @param events_list list of characters
-#'
-#' @return tbl
-#' @export
-create_events_table <- function(events_list) {
-  
-  event_tbl <- events_list %>%
-    base::Filter(f = function(x) stringr::str_detect(x, pattern = "\\d{4} ")) %>%
-    purrr::map_df(.f = events_as_row) %>%
-    dplyr::bind_rows() 
-  
-  return(event_tbl)
-}
-
 #' Extract out the births/deaths string as a list - one element per person + date
 #'
 #' @param events_list list of characters
 #'
 #' @return list of characters
-to_bd_list <- function(events_list) {
+text_to_birth_death_list <- function(events_list) {
   last_pos <- length(events_list)
   
   # convert the string into a list of birth and deaths
@@ -98,42 +64,32 @@ to_bd_list <- function(events_list) {
   return(persons_list)
 }
 
-#' Convert birth/death event to tibble row
+#' Convert list of strings into a tibble of events and details
 #'
-#' @param event_str character vector with format Person (b./d. YYYY)
+#' @param events_list list of characters
 #'
-#' @return tibble with columns Person, Event e.g.
-#'   ```R  
-#'   Person             Event           
-#'   Gerardus           Mercator Born On This Day`
-#'   Alessandro Volta   Died On This Day
-#'  ````
-bd_as_row <- function(event_str) {
+#' @return tbl
+#' @export
+create_events_table <- function(events_list) {
   
-  # extract the birth/death date
-  #stringr::str_extract(event_str, pattern = "[bd]. \\d{4}") #TODO fix
+  # inner
+  to_row <- function(event_str) {
+    event_row <- tibble::tibble(
+      Year = stringr::str_extract(event_str, pattern = '(\\d{4})'),
+      Details = stringr::str_split(event_str, pattern = " \032 ")[[1]][2]
+    )
+    return(event_row)
+  }
   
-  # determine birth or death
-  birth_or_death <- ifelse(
-    grepl(event_str, pattern = ".b"), 
-    cli::col_br_green("Born"), 
-    cli::col_br_red("Died")
-  )
+  event_tbl <- events_list %>%
+    base::Filter(
+      f = function(x)
+        stringr::str_detect(x, pattern = "\\d{4} ")
+    ) %>%
+    purrr::map_df(.f = to_row) %>%
+    dplyr::bind_rows()
   
-  dob <- stringr::str_extract(event_str, pattern = "\\d{4}")
-  
-  #TODO determine year or birth/death
-  
-  name <- stringr::str_split(event_str, "\\(") %>% 
-    purrr::pluck(1,1) %>% 
-    stringr::str_trim()
-  
-  bday_tbl <- tibble::tibble(
-    Person = name,
-    Event = paste(birth_or_death, "-", dob)
-  )
-  
-  return(bday_tbl)
+  return(event_tbl)
 }
 
 
@@ -145,9 +101,37 @@ bd_as_row <- function(event_str) {
 #' @export
 create_births_deaths_table <- function(events_list) {
   
+  to_row <- function(event_str) {
+    
+    # extract the birth/death date
+    #stringr::str_extract(event_str, pattern = "[bd]. \\d{4}") #TODO fix
+    
+    # determine birth or death
+    birth_or_death <- ifelse(
+      grepl(event_str, pattern = ".b"), 
+      cli::col_br_green("Born"), 
+      cli::col_br_red("Died")
+    )
+    
+    dob <- stringr::str_extract(event_str, pattern = "\\d{4}")
+    
+    #TODO determine year or birth/death
+    
+    name <- stringr::str_split(event_str, "\\(") %>% 
+      purrr::pluck(1,1) %>% 
+      stringr::str_trim()
+    
+    bday_tbl <- tibble::tibble(
+      Person = name,
+      Event = paste(birth_or_death, "-", dob)
+    )
+    
+    return(bday_tbl)
+  }
+  
   bd_tbl <- events_list %>% 
-    to_bd_list() %>%
-    purrr::map(.f = bd_as_row) %>%
+    text_to_birth_death_list() %>%
+    purrr::map(.f = to_row) %>%
     dplyr::bind_rows() 
   
   return(bd_tbl)

@@ -4,10 +4,10 @@
 \alias{read_wiki_html}
 \title{Read in Wikipedia html and convert to string}
 \usage{
-read_wiki_html(wiki_date = NULL)
+read_wiki_html(main_page, archive)
 }
 \arguments{
-\item{wiki_date}{str in the format \%d \%B specifying the date of the archived article to retrieve}
+\item{main_page}{xmlnode_tree object output from \code{\link[rvest:reexports]{rvest::read_html()}}}
 }
 \value{
 character vector with all the wikipedia contents
