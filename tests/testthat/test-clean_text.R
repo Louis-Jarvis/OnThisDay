@@ -17,7 +17,13 @@
 #   expect_equal(exp_dead, res_dead)
 # })
 
-test_that("Test that create_births_deaths_table works as expected",{
+test_that("Test that create_events_table", {
+  exp_event_tbl <- tibble::tibble(
+    
+  )
+})
+
+test_that("Test that create_births_deaths_table works as expected", {
   
   exp_bd_tbl <- tibble::tribble(
     ~Person, ~Event,

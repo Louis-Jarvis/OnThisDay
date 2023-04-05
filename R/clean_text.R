@@ -103,9 +103,6 @@ create_births_deaths_table <- function(events_list) {
   
   to_row <- function(event_str) {
     
-    # extract the birth/death date
-    #stringr::str_extract(event_str, pattern = "[bd]. \\d{4}") #TODO fix
-    
     # determine birth or death
     birth_or_death <- ifelse(
       grepl(event_str, pattern = ".b"), 
@@ -114,8 +111,6 @@ create_births_deaths_table <- function(events_list) {
     )
     
     dob <- stringr::str_extract(event_str, pattern = "\\d{4}")
-    
-    #TODO determine year or birth/death
     
     name <- stringr::str_split(event_str, "\\(") %>% 
       purrr::pluck(1,1) %>% 

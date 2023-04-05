@@ -12,20 +12,17 @@
 
 #TODO wrap in a try execpt
 
-#' Read in Wikipedia html and convert to string
-#' @param wiki_date str in the format %d %B specifying the date of the archived article to retrieve
-#'
-#' @return character vector with all the wikipedia contents
-#' @export
-read_wiki_html <- function(wiki_date = NULL) {
+make_request <- function(wiki_date = NULL) {
   
   if (!is.null(wiki_date)) {
+    
     num_str <- stringr::str_extract(wiki_date, "[[:digit:]]+")
     mnth_str <- stringr::str_extract(wiki_date, paste(month.name, collapse="|"))
-    
-   if(isFALSE(stringr::str_to_title(mnth_str) %in% month.name) && isFALSE(stringr::str_to_title(mnth_str) %in% month.abb)) {
-     cli::cli_alert_danger("Invalid Month")
-   }
+  
+    if(isFALSE(stringr::str_to_title(mnth_str) %in% month.name) && 
+       isFALSE(stringr::str_to_title(mnth_str) %in% month.abb)) {
+        cli::cli_alert_danger("Invalid Month")
+    }
     
     num_str <- as.integer(num_str)
     mnth_str <- stringr::str_to_title(mnth_str)
@@ -37,9 +34,25 @@ read_wiki_html <- function(wiki_date = NULL) {
     }
     
     cli::cli_text("Retrieving info for: {.field {num_str} {mnth_str}}")
-    
+    main_page <- rvest::read_html(glue::glue("https://en.wikipedia.org/wiki/Wikipedia:Selected_anniversaries/{mnth_str}_{num_str}")) 
+  
+  }
+  
+  main_page <- main_page <- rvest::read_html("https://en.wikipedia.org/wiki/Main_Page")
+  
+  return(main_page)
+}
 
-    main_page <- rvest::read_html(glue::glue("https://en.wikipedia.org/wiki/Wikipedia:Selected_anniversaries/{mnth_str}_{num_str}"))
+
+#' Read in Wikipedia html and convert to string
+#' @param main_page xmlnode_tree object output from [rvest::read_html()]
+#'
+#' @return character vector with all the wikipedia contents
+#' @export
+read_wiki_html <- function(main_page, archive) {
+
+  if (archive) {
+
     days_str <- main_page %>% rvest::html_element(".mw-body-content.mw-content-ltr .mw-parser-output > p") %>% rvest::html_text()
     events_str <- main_page %>% rvest::html_element(".mw-body-content.mw-content-ltr .mw-parser-output > ul") %>% rvest::html_text()
     ppl_str <- main_page %>% rvest::html_elements(".mw-body-content.mw-content-ltr .mw-parser-output > .hlist") %>% rvest::html_text()
@@ -49,8 +62,6 @@ read_wiki_html <- function(wiki_date = NULL) {
       stringi::stri_enc_toascii()
     
   } else {
-    
-    main_page <- rvest::read_html("https://en.wikipedia.org/wiki/Main_Page")
     
     today_list_str <- main_page %>% 
       rvest::html_element("#mp-otd") %>% # use css selectors to obtain div
@@ -72,7 +83,11 @@ read_wiki_html <- function(wiki_date = NULL) {
 #'
 get_daily_facts <- function(wiki_date = NULL) {
   
-  events_list <- read_wiki_html(wiki_date) %>% text_to_event_list()
+  is_archive <- !is.null(wiki_date)
+  
+  events_list <-  make_request(wiki_date) %>% 
+    read_wiki_html(is_archive) %>% 
+    text_to_event_list()
   
   # Current Date
   cli::cli_h1(cli::col_green(glue::glue("Guess What Happened On {format(Sys.Date(),'%B %d')}!")))
@@ -94,7 +109,7 @@ get_daily_facts <- function(wiki_date = NULL) {
     cli::cli_end(ulid)
   }
   
-  ## Historiocal Events
+  ## Historical Events
   events_tbl <- events_list %>% create_events_table()
   tbl_to_ul_output(
     events_tbl, 
