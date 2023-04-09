@@ -41,9 +41,10 @@ make_request <- function(wiki_date = NULL) {
     cli::cli_text("Retrieving info for: {.field {num_str} {mnth_str}}")
     main_page <- rvest::read_html(glue::glue("https://en.wikipedia.org/wiki/Wikipedia:Selected_anniversaries/{mnth_str}_{num_str}")) 
   
+  } else {
+    main_page <- main_page <- rvest::read_html("https://en.wikipedia.org/wiki/Main_Page")    
   }
-  
-  main_page <- main_page <- rvest::read_html("https://en.wikipedia.org/wiki/Main_Page")
+
   
   return(main_page)
 }
@@ -58,6 +59,7 @@ read_wiki_html <- function(main_page, archive) {
 
   if (archive) {
 
+    #TODO simplify this into one function
     days_str <- main_page %>% rvest::html_element(".mw-body-content.mw-content-ltr .mw-parser-output > p") %>% rvest::html_text()
     events_str <- main_page %>% rvest::html_element(".mw-body-content.mw-content-ltr .mw-parser-output > ul") %>% rvest::html_text()
     ppl_str <- main_page %>% rvest::html_elements(".mw-body-content.mw-content-ltr .mw-parser-output > .hlist") %>% rvest::html_text()
