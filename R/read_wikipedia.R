@@ -12,15 +12,20 @@
 
 #TODO wrap in a try execpt
 
+#' Make request to Wikipedia and return page as a string
+#'
+#' @param wiki_date string, giving date of desired article.
+#
+#' @return multiline string
+#' 
 make_request <- function(wiki_date = NULL) {
   
   if (!is.null(wiki_date)) {
     
     num_str <- stringr::str_extract(wiki_date, "[[:digit:]]+")
-    mnth_str <- stringr::str_extract(wiki_date, paste(month.name, collapse="|"))
+    mnth_str <- stringr::str_extract(stringr::str_to_title(wiki_date), paste(month.name, collapse="|"))
   
-    if(isFALSE(stringr::str_to_title(mnth_str) %in% month.name) && 
-       isFALSE(stringr::str_to_title(mnth_str) %in% month.abb)) {
+    if(isFALSE(mnth_str %in% month.name) && isFALSE(mnth_str %in% month.abb)) {
         cli::cli_alert_danger("Invalid Month")
     }
     
@@ -111,7 +116,7 @@ get_daily_facts <- function(wiki_date = NULL) {
   
   ## Historical Events
   events_tbl <- events_list %>% create_events_table()
-  tbl_to_ul_output(
+  tbl_to_cli_output(
     events_tbl, 
     header_text = "On This Day...", 
     title_col = "Year", 
@@ -120,7 +125,7 @@ get_daily_facts <- function(wiki_date = NULL) {
 
   ## Famous Figures
   famous_ppl_tbl <- events_list %>% create_births_deaths_table()
-  tbl_to_ul_output(
+  tbl_to_cli_output(
     famous_ppl_tbl, 
     header_text = "Famous Births/Deaths", 
     title_col = "Person", 
@@ -138,7 +143,7 @@ get_daily_facts <- function(wiki_date = NULL) {
 
 #TODO add skull or baby emoji for birth/death
 
-tbl_to_ul_output <- function(event_tbl, header_text, title_col = "Year", text_col = "Details"){
+tbl_to_cli_output <- function(event_tbl, header_text, title_col = "Year", text_col = "Details"){
   
   if(nrow(event_tbl) > 0) {
     cli::cli_h2(cli::col_cyan(header_text))
