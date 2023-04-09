@@ -4,8 +4,6 @@
 #' @param pattern character expression to drop
 #'
 #' @return a string with all text between "More anniversaries" and the end excluded
-#' @export
-#' 
 drop_substring <- function(paragraph_str, pattern) {
   
   anni_start <- paragraph_str %>% 
@@ -25,18 +23,18 @@ drop_substring <- function(paragraph_str, pattern) {
 #' @param today_list_str character vector
 #'
 #' @return list of characters, each a different sentence
-#' @export
 text_to_event_list <- function(today_list_str) {
+  
+  period_bw_letters <- "(?<=[a-z])\\.(?=[A-Z]|[a-z)])"
   
   # this stops multiple sentences being put on the same line e.g. 
   # foo.Bar -- > foo.\nBar, which can then be split into multiple lines
-
   today_list_vec <- today_list_str %>%
     drop_substring(pattern = "More anniversaries") %>%
     drop_substring(pattern = "Archive") %>%
     stringr::str_replace(
       string = .,
-      pattern = "(?<=[a-z])\\.(?=[A-Z])",
+      pattern = period_bw_letters,
       replacement = ".\n"
     ) %>%
     stringr::str_split(pattern = "\n") %>%
@@ -69,7 +67,6 @@ text_to_birth_death_list <- function(events_list) {
 #' @param events_list list of characters
 #'
 #' @return tbl
-#' @export
 create_events_table <- function(events_list) {
   
   # inner
@@ -93,12 +90,11 @@ create_events_table <- function(events_list) {
 }
 
 
-#' create a table of all the people who have been boren/ died on this day.
+#' create a table of all the people who have been boren/ died on this day
 #'
 #' @param events_list list of birth/death event strings
 #'
 #' @return tibble of births and deaths on this day
-#' @export
 create_births_deaths_table <- function(events_list) {
   
   to_row <- function(event_str) {
