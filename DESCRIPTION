@@ -1,5 +1,5 @@
 Package: OnThisDay
-Title: Find Out What Happened On This Very Day! Courtesy of Wikipedia.
+Title: Find Out What Happened On This Very Day! Courtesy of Wikipedia
 Version: 1.0.0
 Authors@R: 
     person("Louis", "jarvis", , "louisjarvisnz@gmail.com", role = c("aut", "cre"))
