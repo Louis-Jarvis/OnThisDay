@@ -7,7 +7,9 @@
 read_wiki_html(main_page, archive)
 }
 \arguments{
-\item{main_page}{xmlnode_tree object output from \code{\link[rvest:reexports]{rvest::read_html()}}}
+\item{main_page}{xmlnode_tree, output from \code{\link[rvest:reexports]{rvest::read_html()}}}
+
+\item{archive}{logical, whether or not we are fetching events from an archived page}
 }
 \value{
 character vector with all the wikipedia contents

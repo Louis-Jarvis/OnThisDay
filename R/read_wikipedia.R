@@ -51,7 +51,8 @@ make_request <- function(wiki_date = NULL) {
 
 
 #' Read in Wikipedia html and convert to string
-#' @param main_page xmlnode_tree object output from [rvest::read_html()]
+#' @param main_page xmlnode_tree, output from [rvest::read_html()]
+#' @param archive logical, whether or not we are fetching events from an archived page
 #'
 #' @return character vector with all the wikipedia contents
 #' @export
@@ -84,7 +85,7 @@ read_wiki_html <- function(main_page, archive) {
 
 
 #' Grab daily facts from "https://en.wikipedia.org/wiki/Main_Page" and print out
-#' @inheritParams read_wiki_html
+#' @param wiki_date str, date of article we are looking for.
 #' @return NULL
 #' @export
 #'
@@ -134,6 +135,7 @@ get_daily_facts <- function(wiki_date = NULL) {
     text_col = "Event"
     )
   
+  #TODO replace this with the archived page
   cli::cli_text("See for yourself at {.url https://en.wikipedia.org/wiki/Main_Page}")
   
   d <- cli::cli_div(theme = list(rule = list(color = "cyan")))
