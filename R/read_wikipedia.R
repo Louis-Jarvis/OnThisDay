@@ -7,7 +7,6 @@
 #TODO give option to only print one fact at a time
 ##TODO use global config to set defaults
 
-
 #TODO write a function to get historic ones
 
 #TODO wrap in a try execpt
@@ -59,15 +58,31 @@ make_request <- function(wiki_date = NULL) {
 read_wiki_html <- function(main_page, archive) {
 
   if (archive) {
+    
+    CSS_SELECTOR = ".mw-body-content.mw-content-ltr .mw-parser-output"
 
     #TODO simplify this into one function
-    days_str <- main_page %>% rvest::html_element(".mw-body-content.mw-content-ltr .mw-parser-output > p") %>% rvest::html_text()
-    events_str <- main_page %>% rvest::html_element(".mw-body-content.mw-content-ltr .mw-parser-output > ul") %>% rvest::html_text()
-    ppl_str <- main_page %>% rvest::html_elements(".mw-body-content.mw-content-ltr .mw-parser-output > .hlist") %>% rvest::html_text()
     
-    today_list_str <- c(days_str, events_str, ppl_str) %>%
-      paste0(collapse="") %>%
+    today_list_str <- purrr::map_chr(
+      .x = c("p", "ul", ".hlist"),
+      .f = function(el) {
+        #browser()
+        el_str <- main_page %>%
+          rvest::html_element(glue::glue("{CSS_SELECTOR} > {el}")) %>%
+          rvest::html_text()
+      }
+    ) %>%
+      paste0(collapse = "") %>%
       stringi::stri_enc_toascii()
+      
+    
+    # days_str <- main_page %>% rvest::html_element("{CSS_SELECTOR} > p") %>% rvest::html_text()
+    # events_str <- main_page %>% rvest::html_element("{CSS_SELECTOR} > ul") %>% rvest::html_text()
+    # ppl_str <- main_page %>% rvest::html_elements("{CSS_SELECTOR} > .hlist") %>% rvest::html_text()
+    # 
+    # today_list_str <- c(days_str, events_str, ppl_str) %>%
+    #   paste0(collapse="") %>%
+    #   stringi::stri_enc_toascii()
     
   } else {
     
@@ -118,22 +133,22 @@ get_daily_facts <- function(wiki_date = NULL) {
   }
   
   ## Historical Events
-  events_tbl <- events_list %>% create_events_table()
-  tbl_to_cli_output(
-    events_tbl, 
-    header_text = "On This Day...", 
-    title_col = "Year", 
-    text_col = "Details"
-    )
+  events_tbl <- events_list %>% 
+    create_events_table() %>%
+    tbl_to_cli_output( 
+      header_text = "On This Day...", 
+      title_col = "Year", 
+      text_col = "Details"
+      )
 
   ## Famous Figures
-  famous_ppl_tbl <- events_list %>% create_births_deaths_table()
-  tbl_to_cli_output(
-    famous_ppl_tbl, 
-    header_text = "Famous Births/Deaths", 
-    title_col = "Person", 
-    text_col = "Event"
-    )
+  famous_ppl_tbl <- events_list %>% 
+    create_births_deaths_table() %>%
+    tbl_to_cli_output(
+      header_text = "Famous Births/Deaths", 
+      title_col = "Person", 
+      text_col = "Event"
+      )
   
   #TODO replace this with the archived page
   cli::cli_text("See for yourself at {.url https://en.wikipedia.org/wiki/Main_Page}")
@@ -145,21 +160,34 @@ get_daily_facts <- function(wiki_date = NULL) {
   return(invisible(NULL))
 }
 
-#TODO add skull or baby emoji for birth/death
 
+#' Convert a tibble into cli list output
+#'
+#' @param event_tbl tibble, table of events with a date and event string.
+#' @param header_text character, text for section header.
+#' @param title_col character, name of col that forms the header.
+#' @param text_col character, name of event description column.
+#'
+#' @return NULL
 tbl_to_cli_output <- function(event_tbl, header_text, title_col = "Year", text_col = "Details"){
   
-  if(nrow(event_tbl) > 0) {
-    cli::cli_h2(cli::col_cyan(header_text))
-  }
+  if (nrow(event_tbl) > 0) cli::cli_h2(cli::col_cyan(header_text))
   
   lid <- cli::cli_ul()
   
   for (i in seq_len(nrow(event_tbl))) {
-    yr = event_tbl[i, title_col]
-    txt = event_tbl[i, text_col]
     
-    cli::cli_li(cli::style_italic(cli::col_yellow(paste0("\t",yr))))
+    yr <- event_tbl[i, title_col]
+    txt <- event_tbl[i, text_col]
+    
+    #cli::cli_li(cli::style_italic(cli::col_yellow(paste0("\t", yr))))
+    cli::cli_li(
+      cli::style_italic(
+        cli::col_yellow(
+          paste0("\t", yr)
+          )
+        )
+      )
     cli::cli_text(txt)
     cli::cli_par()
   }
