@@ -1,21 +1,36 @@
 #' Drop all text between start of word and end of the string
 #'
-#' @param paragraph_str character vector, the wikipedia page content as a single string
-#' @param pattern character expression to drop
+#' @param paragraph_str character vector, the wikipedia page content as a single string.
+#' @param pattern character expression to drop.
 #'
-#' @return a string with all text between "More anniversaries" and the end excluded
-drop_substring <- function(paragraph_str, pattern) {
+#' @return a string with all text between "More anniversaries" and the end excluded.
+# drop_substring <- function(paragraph_str, pattern) {
+#   
+#   
+#   str_pos <- stringr::str_locate_all(paragraph_str, pattern) #%>% purrr::pluck(1)
+#   
+#   if(all(is.na(str_pos))) return(paragraph_str)
+#   
+#   for (idx in str_pos) {
+#     paragraph_str <- gsub(pattern = pattern, replacement = "", x = paragraph_str)
+#   }
+#   
+#   #str_stripped <- paragraph_str %>% 
+#   #  stringr::str_sub(start = 1, end = str_pos-1) 
+#   
+#   #return(str_stripped)
+#   return(paragraph_str)
+# }
+
+remove_footer <- function(article_txt) {
   
-  anni_start <- paragraph_str %>% 
-    stringr::str_locate(pattern) %>% 
-    purrr::pluck(1)
-  
-  if(is.na(anni_start)) return(paragraph_str)
-  
-  str_stripped <- paragraph_str %>% 
-    stringr::str_sub(start = 1, end = anni_start-1) 
-  
-  return(str_stripped)
+  pos <- stringr::str_locate(article_txt, "More anniversaries")
+  if (!all(is.na(pos))) {
+    res <- substr(article_txt, 1, pos[1]-1)
+  } else {
+  res <- article_txt
+  }
+  return(res)
 }
 
 #' split large string into list of sentences
@@ -30,10 +45,10 @@ text_to_event_list <- function(today_list_str) {
   # this stops multiple sentences being put on the same line e.g. 
   # foo.Bar -- > foo.\nBar, which can then be split into multiple lines
   today_list_vec <- today_list_str %>%
-    drop_substring(pattern = "More anniversaries") %>%
-    drop_substring(pattern = "Archive") %>%
+    remove_footer() %>%
+    #drop_substring(pattern = "More anniversaries") %>%
+    #drop_substring(pattern = "Archive") %>%
     stringr::str_replace(
-      string = .,
       pattern = period_bw_letters,
       replacement = ".\n"
     ) %>%
@@ -54,8 +69,7 @@ text_to_birth_death_list <- function(events_list) {
   
   # convert the string into a list of birth and deaths
   persons_list <- events_list[last_pos] %>% 
-    stringr::str_split(pattern = "\\)") %>% 
-    purrr::pluck(1) %>% 
+    stringr::str_split(pattern = "\\)", simplify = T) %>% 
     as.list() %>%
     base::Filter(f = function(line) dplyr::if_else(line == "", F, T), x = .) 
   
@@ -71,9 +85,10 @@ create_events_table <- function(events_list) {
   
   # inner
   to_row <- function(event_str) {
+    
     event_row <- tibble::tibble(
       Year = stringr::str_extract(event_str, pattern = '(\\d{4})'),
-      Details = stringr::str_split(event_str, pattern = " \032 ")[[1]][2]
+      Details = stringr::str_split_i(event_str, pattern = " \032 ", i = 2)
     )
     return(event_row)
   }
@@ -106,10 +121,10 @@ create_births_deaths_table <- function(events_list) {
       cli::col_br_red("Died")
     )
     
-    dob <- stringr::str_extract(event_str, pattern = "\\d{4}")
+    dob <- stringr::str_extract(event_str, pattern = "\\d{1,4}")
     
-    name <- stringr::str_split(event_str, "\\(") %>% 
-      purrr::pluck(1,1) %>% 
+    name <- stringr::str_split_i(event_str, "\\(", i = 1) %>% 
+      #purrr::pluck(1,1) %>% 
       stringr::str_trim()
     
     bday_tbl <- tibble::tibble(
