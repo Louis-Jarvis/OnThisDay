@@ -107,22 +107,26 @@ read_wiki_html <- function(main_page, archive) {
 get_daily_facts <- function(wiki_date = NULL) {
   
   is_archive <- !is.null(wiki_date)
-  
+ 
   events_list <-  make_request(wiki_date) %>% 
     read_wiki_html(is_archive) %>% 
     text_to_event_list()
   
   # Current Date
-  cli::cli_h1(cli::col_green(glue::glue("Guess What Happened On {format(Sys.Date(),'%B %d')}!")))
-  cli::cli_text(paste("Today's Date:", cli::style_italic(format(Sys.Date(),"%A %d %B %Y"))))
+  cli::cli_h1(cli::col_green(
+    glue::glue("Guess What Happened On {format(Sys.Date(),'%B %d')}!")
+  ))
+  cli::cli_text(paste("Today's Date:", cli::style_italic(format(
+    Sys.Date(), "%A %d %B %Y"
+  ))))
   
-  ## National Holidays
-  national_days <- stringr::str_split(events_list[1], pattern = ":")[[1]][2]
+  # National Holidays
+  national_days <- stringr::str_split_i(events_list[1], pattern = ":", i = 2) #[[1]][2]
   
   if(!is.na(national_days)) {
-    cli::cli_h2(cli::col_cyan("Festivals / National Days of Importance / Holidays"))  
+    cli::cli_h2(cli::col_cyan("Festivals / National Days of Importance / Holidays"))
     
-    nat_days_list <- stringr::str_split(national_days, pattern = ";")[[1]] %>% 
+    nat_days_list <- stringr::str_split_i(national_days, pattern = ";", i = 1) %>% #[[1]] 
       stringr::str_squish()
     
     ulid <- cli::cli_ul()
@@ -142,6 +146,7 @@ get_daily_facts <- function(wiki_date = NULL) {
       )
 
   ## Famous Figures
+  browser()
   famous_ppl_tbl <- events_list %>% 
     create_births_deaths_table() %>%
     tbl_to_cli_output(
