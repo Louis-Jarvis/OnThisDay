@@ -1,52 +1,16 @@
-# test_that("test bd_as_row works as expected", {
-#   
-#   exp_born <- tibble::tibble(
-#     Person = "John Doe", 
-#     Event = paste(cli::col_br_green("Born"), "- 1788")
-#     )
-#   
-#   exp_dead <- tibble::tibble(
-#     Person = "John Doe", 
-#     Event = paste(cli::col_br_red("Died"), "- 1788")
-#   )
-#   
-#   res_brn <- bd_as_row("John Doe (b. 1788)")
-#   res_dead <- bd_as_row("John Doe (d. 1788)")
-#   
-#   expect_equal(exp_born, res_brn)
-#   expect_equal(exp_dead, res_dead)
-# })
 
-test_that("Test that create_events_table", {
-  exp_event_tbl <- tibble::tibble(
-    
-  )
-})
 
-test_that("Test that create_births_deaths_table works as expected", {
+test_that("Test that text_to_event_list works as expected", {
+  article_str <- "This is a list of events that have happened.\n1984 \032 Some guy wrote a book.\n2020 \032 there was a pandemic.John Doe (b. 884).Jane Doe."
   
-  exp_bd_tbl <- tibble::tribble(
-    ~Person, ~Event,
-    "John Doe", paste(cli::col_br_green("Born"), "- 1886"),
-    "Jane Doe", paste(cli::col_br_red("Died"), "- 1788")
+  exp_list <- c(
+    "This is a list of events that have happened.",
+    "1984 \032 Some guy wrote a book.",
+    "2020 \032 there was a pandemic.",
+    "John Doe (b. 884).Jane Doe."
   )
   
-  input_list <- list("1600 - Foo", "1700 - Far", "John Doe (b. 1886)Jane Doe(d. 1788)")
-  input_w_spaces <- list("1600 - Foo", "1700 - Far", "John Doe (b. 1886)  Jane Doe(d. 1788)")
+  res_list <- text_to_event_list(article_str)
   
-  # need to write condition
-  input_end_str <- list("1600 - Foo", "1700 - Far", "John Doe (b. 1886)Jane Doe(d. 1788)", "not correct") #FIXME
-  input_no_bd <- list("1600 - Foo", "1700 - Far", "", "", "wrrong str") #FIXME
-  input_w_empty <- list("1600 - Foo", "1700 - Far", "", "", "John Doe (b. 1886)Jane Doe(d. 1788)")
-  
-  res_bd_tbl_norm <- create_births_deaths_table(input_list)
-  res_bd_tbl_space <- create_births_deaths_table(input_w_spaces)
-  
-  res_bd_tbl_end_str <- create_births_deaths_table(input_end_str) #FIXME
-  res_bd_tbl_no_bd <- create_births_deaths_table(input_no_bd)#FIXME
-  
-  expect_equal(exp_bd_tbl, res_bd_tbl_norm)
-  expect_equal(exp_bd_tbl,res_bd_tbl_space)
-  
+  expect_identical(res_list, exp_list)
 })
-
