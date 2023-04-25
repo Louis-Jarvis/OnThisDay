@@ -2,7 +2,7 @@
 % Please edit documentation in R/output_utils.R
 \name{make_pretty_output}
 \alias{make_pretty_output}
-\title{Factory function}
+\title{Factory function to create pretty printing cli functions}
 \usage{
 make_pretty_output(cli_header, cli_col)
 }
@@ -15,7 +15,7 @@ make_pretty_output(cli_header, cli_col)
 function to pretty print text to console
 }
 \description{
-Factory function
+Factory function to create pretty printing cli functions
 }
 \seealso{
 headers; \code{\link[cli:cli_h1]{cli::cli_h1()}}, \code{\link[cli:cli_h1]{cli::cli_h2()}}, \code{\link[cli:cli_text]{cli::cli_text()}}; colours

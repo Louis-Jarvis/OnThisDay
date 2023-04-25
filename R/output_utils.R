@@ -10,10 +10,16 @@
 make_pretty_output <- function(cli_header, cli_col) {
   
   inner <- function(text) {
-    cli_header(cli_col(glue::glue(text)))
+    cli_header(cli_col(text))
   }
   
   return(inner)
+}
+
+pretty_list <- function(items, f, ...) {
+  ulid <- cli::cli_ul()
+  lapply(items, function(x, ...) f(x), ...)
+  cli::cli_end(ulid)
 }
 
 # Styled output functions ------------------------------------------------------
@@ -27,3 +33,5 @@ italic_date <- make_pretty_output(cli::cli_text,
                                     paste("Today's Date:", cli::style_italic(format(
                                       Sys.Date(), "%A %d %B %Y"
                                     ))))
+
+italic_li <- make_pretty_output(cli::style_italic, cli::col_yellow)

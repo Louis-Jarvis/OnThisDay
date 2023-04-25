@@ -1,43 +1,54 @@
-
-
-#TODO give option to only print one fact at a time
-#TODO use global config to set defaults
-#TODO wrap in a try execpt
-
-#' Make request to Wikipedia and return page as a string
+#' Check the wiki_date is valid
 #'
 #' @param wiki_date string, giving date of desired article.
 #
 #' @return multiline string
 #' 
+check_date_input <- function(wiki_date) {
+  wiki_date <- stringr::str_to_title(wiki_date)
+  num_str <- stringr::str_extract(wiki_date, "[[:digit:]]+")
+  mnth_str <-
+    stringr::str_extract(wiki_date, paste(month.name, collapse = "|"))
+  
+  date_str <-
+    try(as.Date(paste(num_str, mnth_str), format = "%d %B"))
+  
+  if ("try-error" %in% class(date_str) || is.na(date_str)) {
+    stop(glue::glue("Invalid Input: \'{wiki_date}'\ is not a real date!"))
+  }
+  
+  return(list(
+    num_str = num_str,
+    mnth_str = stringr::str_to_title(mnth_str)
+  ))
+}
+
+#' Make request to Wikipedia and return page as a string
+#'
+#' @inheritParams check_date_input
+#
+#' @return multiline string
+#' 
 make_request <- function(wiki_date = NULL) {
+
+  BASE_URL <- "https://en.wikipedia.org/wiki"
   
   if (!is.null(wiki_date)) {
     
-    num_str <- stringr::str_extract(wiki_date, "[[:digit:]]+")
-    mnth_str <- stringr::str_extract(stringr::str_to_title(wiki_date), paste(month.name, collapse="|"))
-  
-    if(isFALSE(mnth_str %in% month.name) && isFALSE(mnth_str %in% month.abb)) {
-        cli::cli_alert_danger("Invalid Month")
-    }
+    dt <- check_date_input(wiki_date)
     
-    num_str <- as.integer(num_str)
-    mnth_str <- stringr::str_to_title(mnth_str)
+    cli::cli_alert_info("Retrieving info for: {.field {dt$num_str} {dt$mnth_str}}")
+    main_page <-
+      rvest::read_html(
+        glue::glue(
+          "{BASE_URL}/Wikipedia:Selected_anniversaries/{dt$mnth_str}_{dt$num_str}"
+        )
+      )
     
-    # see https://stackoverflow.com/questions/13450360/how-to-validate-date-in-r
-    d <- try(as.Date(paste(num_str, mnth_str), format="%d %B"))
-    if("try-error" %in% class(d) || is.na(d)) {
-      cli::cli_alert_danger("Invalid Input: {num_str} {mnth_str} is not a real date!")
-    }
-    
-    cli::cli_text("Retrieving info for: {.field {num_str} {mnth_str}}")
-    main_page <- rvest::read_html(glue::glue("https://en.wikipedia.org/wiki/Wikipedia:Selected_anniversaries/{mnth_str}_{num_str}")) 
-  
   } else {
-    main_page <- main_page <- rvest::read_html("https://en.wikipedia.org/wiki/Main_Page")    
+    main_page <- main_page <- rvest::read_html(glue::glue("{BASE_URL}/Main_Page"))
   }
 
-  
   return(main_page)
 }
 
@@ -53,8 +64,6 @@ read_wiki_html <- function(main_page, archive) {
   if (archive) {
     
     CSS_SELECTOR = ".mw-body-content.mw-content-ltr .mw-parser-output"
-
-    #TODO simplify this into one function
     
     today_list_str <- purrr::map_chr(
       .x = c("p", "ul", ".hlist"),
@@ -79,6 +88,7 @@ read_wiki_html <- function(main_page, archive) {
 }
 
 #' Grab daily facts from "https://en.wikipedia.org/wiki/Main_Page" and print out
+#' 
 #' @param wiki_date str, date of article we are looking for.
 #' @return NULL
 #' @export
@@ -87,54 +97,40 @@ get_daily_facts <- function(wiki_date = NULL) {
   
   is_archive <- !is.null(wiki_date)
  
-  events_list <-  make_request(wiki_date) %>% 
+  events_list <- make_request(wiki_date) %>% 
     read_wiki_html(is_archive) %>% 
     text_to_event_list()
   
-  # Current Date
-  # cli::cli_h1(cli::col_green(
-  #   glue::glue("Guess What Happened On {format(Sys.Date(),'%B %d')}!")
-  # ))
-  h1_cyan("Guess What Happened Today!")
-  italic_date()
-  # cli::cli_text(paste("Today's Date:", cli::style_italic(format(
-  #   Sys.Date(), "%A %d %B %Y"
-  # ))))
-  
-  # National Holidays
-  national_days <- stringr::str_split_i(events_list[1], pattern = ":", i = 2) #[[1]][2]
-  
-  if(!is.na(national_days)) {
-    #cli::cli_h2(cli::col_cyan("Festivals / National Days of Importance / Holidays"))
-    h2_cyan("Festivals / National Days of Importance / Holidays")
-    
-    nat_days_list <- stringr::str_split_i(national_days, pattern = ";", i = 1) %>% #[[1]] 
-      stringr::str_squish()
-    
-    ulid <- cli::cli_ul()
-    for (day in nat_days_list) {
-      cli::cli_li(day) 
-    }
-    cli::cli_end(ulid)
+  if (is_archive) {
+    h1_cyan(glue::glue("Guess What Happened on {wiki_date}!"))
+  } else {
+    h1_cyan("Guess What Happened Today!")
+    italic_date()
   }
   
+  # National Holidays
+  national_days <- stringr::str_split_i(events_list[1], ":", 2)
+  
+  if(!is.na(national_days)) {
+    
+    h2_cyan("Festivals / National Days of Importance / Holidays")
+    nat_days_list <- stringr::str_split_i(national_days, ";", 1) %>% trimws()
+    pretty_list(nat_days_list, function(txt) cli::cli_li(italic_li(txt)))
+  }
+    
   ## Historical Events
   events_tbl <- events_list %>% 
     create_events_table() %>%
-    tbl_to_cli_output( 
-      header_text = "On This Day...", 
-      title_col = "Year", 
-      text_col = "Details"
-      )
+    tbl_to_cli_output(header_text = "On This Day...",
+                      title_col = "Year",
+                      text_col = "Details")
 
   ## Famous Figures
   famous_ppl_tbl <- events_list %>% 
     create_births_deaths_table() %>%
-    tbl_to_cli_output(
-      header_text = "Famous Births/Deaths", 
-      title_col = "Person", 
-      text_col = "Event"
-      )
+    tbl_to_cli_output(header_text = "Famous Births/Deaths",
+                      title_col = "Person",
+                      text_col = "Event")
   
   #TODO replace this with the archived page
   cli::cli_text("See for yourself at {.url https://en.wikipedia.org/wiki/Main_Page}")
@@ -157,27 +153,17 @@ get_daily_facts <- function(wiki_date = NULL) {
 #' @return NULL
 tbl_to_cli_output <- function(event_tbl, header_text, title_col = "Year", text_col = "Details"){
   
-  if (nrow(event_tbl) > 0) cli::cli_h2(cli::col_cyan(header_text))
+  if (nrow(event_tbl) > 0) h2_cyan(header_text)
   
-  lid <- cli::cli_ul()
-  
-  for (i in seq_len(nrow(event_tbl))) {
+  pretty_list(seq_len(nrow(event_tbl)), function(i, events_tbl) {
     
     yr <- event_tbl[i, title_col]
     txt <- event_tbl[i, text_col]
     
-    #cli::cli_li(cli::style_italic(cli::col_yellow(paste0("\t", yr))))
-    cli::cli_li(
-      cli::style_italic(
-        cli::col_yellow(
-          paste0("\t", yr)
-          )
-        )
-      )
+    cli::cli_li(italic_li(paste0("\t", yr)))
     cli::cli_text(txt)
     cli::cli_par()
-  }
-  
-  cli::cli_end(lid)
+    
+  }, event_tbl)
 }
 

@@ -5,7 +5,6 @@
 #' @return cleaned string
 #' 
 remove_footer <- function(article_txt) {
-  
   pos <- stringr::str_locate(article_txt, "More anniversaries")
   
   if (!all(is.na(pos))) {
@@ -34,20 +33,15 @@ remove_substr <- function(article_txt, substr) {
 #' @return list of characters, each a different sentence
 text_to_event_list <- function(today_list_str) {
   
-  period_bw_letters <- "(?<=[a-z])\\.(?=[A-Z]|[a-z)])"
+  SPACE_BW_LETTERS <- "(?<=[a-z])\\.(?=[A-Z]|[a-z)])" # foo.Bar -- > foo.\nBar
   
-  # this stops multiple sentences being put on the same line e.g. 
-  # foo.Bar -- > foo.\nBar, which can then be split into multiple lines
   today_list_vec <- today_list_str %>%
     remove_footer() %>%
     remove_substr("\\(pictured\\)") %>%
-    stringr::str_replace(
-      pattern = period_bw_letters,
-      replacement = ".\n"
-    ) %>%
-    stringr::str_split(pattern = "\n") %>%
+    stringr::str_replace(SPACE_BW_LETTERS,".\n") %>%
+    stringr::str_split("\n") %>%
     unlist() %>%
-    base::Filter(f = function(line) dplyr::if_else(line == "", F, T), x = .) 
+    base::Filter(f = function(line) ifelse(line == "", F, T)) 
   
   return(today_list_vec)
 }
@@ -60,11 +54,10 @@ text_to_event_list <- function(today_list_str) {
 text_to_birth_death_list <- function(events_list) {
   last_pos <- length(events_list)
   
-  # convert the string into a list of birth and deaths
   persons_list <- events_list[last_pos] %>% 
-    stringr::str_split(pattern = "\\)", simplify = T) %>% 
+    stringr::str_split("\\)", simplify = T) %>% 
     as.list() %>%
-    base::Filter(f = function(line) dplyr::if_else(line == "", F, T), x = .) 
+    base::Filter(f = function(line) ifelse(line == "", F, T)) 
   
   return(persons_list)
 }
@@ -76,23 +69,19 @@ text_to_birth_death_list <- function(events_list) {
 #' @return tbl
 create_events_table <- function(events_list) {
   
-  utf8_hyphen <- " \032 "
+  UTF8_HYPHEN <- " \032 "
+  YEAR_REGEX <- "\\d{1,4}"
   
-  # inner
   to_row <- function(event_str) {
-    
     event_row <- tibble::tibble(
-      Year = stringr::str_extract(event_str, pattern = '(\\d{1,4})'),
-      Details = stringr::str_split_i(event_str, pattern = utf8_hyphen, i = 2)
+      Year = stringr::str_extract(event_str, paste0("(", YEAR_REGEX, ")")),
+      Details = stringr::str_split_i(event_str, UTF8_HYPHEN, 2)
     )
     return(event_row)
   }
   
   event_tbl <- events_list %>%
-    base::Filter(
-      f = function(x)
-        stringr::str_detect(x, pattern = "\\d{4} ")
-    ) %>%
+    base::Filter(f = function(x) stringr::str_detect(x, paste0(YEAR_REGEX, " "))) %>%
     purrr::map_df(.f = to_row) %>%
     dplyr::bind_rows()
   
@@ -107,24 +96,17 @@ create_events_table <- function(events_list) {
 #' @return tibble of births and deaths on this day
 create_births_deaths_table <- function(events_list) {
   
+  YEAR_REGEX <- "\\d{1,4}"
+  
   to_row <- function(event_str) {
+    is_birth_or_death <- ifelse(stringr::str_detect(event_str, ".b"),
+                                cli::col_br_green("Born"),
+                                cli::col_br_red("Died"))
     
-    # determine birth or death
-    birth_or_death <- ifelse(
-      grepl(event_str, pattern = ".b"), 
-      cli::col_br_green("Born"), 
-      cli::col_br_red("Died")
-    )
-    
-    dob <- stringr::str_extract(event_str, pattern = "\\d{1,4}")
-    
-    name <- stringr::str_split_i(event_str, "\\(", i = 1) %>% 
-      stringr::str_trim()
-    
-    bday_tbl <- tibble::tibble(
-      Person = name,
-      Event = paste(birth_or_death, "-", dob)
-    )
+    dob <- stringr::str_extract(event_str, YEAR_REGEX)
+    name <- stringr::str_split_i(event_str, "\\(", 1) %>% trimws()
+    bday_tbl <- tibble::tibble(Person = name,
+                               Event = paste(is_birth_or_death, "-", dob))
     return(bday_tbl)
   }
   
