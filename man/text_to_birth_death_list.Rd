@@ -7,7 +7,7 @@
 text_to_birth_death_list(events_list)
 }
 \arguments{
-\item{events_list}{list of characters}
+\item{events_list}{list of character vectors - each a representing a different paragraph.}
 }
 \value{
 list of characters
