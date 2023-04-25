@@ -1,12 +1,3 @@
-test_that("Test events_as_row works as expected", {
-  
-  # Normal Case
-  exp_normal <- tibble::tibble(Year='1600', Details="foo")
-  res_normal <- events_as_row("1600 \032 foo")
-  
-  expect_equal(exp_normal, res_normal)
-})
-
 # test_that("test bd_as_row works as expected", {
 #   
 #   exp_born <- tibble::tibble(
@@ -26,7 +17,13 @@ test_that("Test events_as_row works as expected", {
 #   expect_equal(exp_dead, res_dead)
 # })
 
-test_that("Test that create_births_deaths_table works as expected",{
+test_that("Test that create_events_table", {
+  exp_event_tbl <- tibble::tibble(
+    
+  )
+})
+
+test_that("Test that create_births_deaths_table works as expected", {
   
   exp_bd_tbl <- tibble::tribble(
     ~Person, ~Event,

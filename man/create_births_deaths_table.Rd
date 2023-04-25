@@ -2,7 +2,7 @@
 % Please edit documentation in R/clean_text.R
 \name{create_births_deaths_table}
 \alias{create_births_deaths_table}
-\title{create a table of all the people who have been boren/ died on this day.}
+\title{create a table of all the people who have been boren/ died on this day}
 \usage{
 create_births_deaths_table(events_list)
 }
@@ -13,5 +13,5 @@ create_births_deaths_table(events_list)
 tibble of births and deaths on this day
 }
 \description{
-create a table of all the people who have been boren/ died on this day.
+create a table of all the people who have been boren/ died on this day
 }
