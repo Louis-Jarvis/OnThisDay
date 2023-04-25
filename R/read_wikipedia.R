@@ -1,14 +1,7 @@
-##TODO 
-# date today
-# yyyy - event description as a tibble
-# Famours births and deaths
-# Return the url
+
 
 #TODO give option to only print one fact at a time
-##TODO use global config to set defaults
-
-#TODO write a function to get historic ones
-
+#TODO use global config to set defaults
 #TODO wrap in a try execpt
 
 #' Make request to Wikipedia and return page as a string
@@ -66,7 +59,6 @@ read_wiki_html <- function(main_page, archive) {
     today_list_str <- purrr::map_chr(
       .x = c("p", "ul", ".hlist"),
       .f = function(el) {
-        #browser()
         el_str <- main_page %>%
           rvest::html_element(glue::glue("{CSS_SELECTOR} > {el}")) %>%
           rvest::html_text()
@@ -74,15 +66,6 @@ read_wiki_html <- function(main_page, archive) {
     ) %>%
       paste0(collapse = "") %>%
       stringi::stri_enc_toascii()
-      
-    
-    # days_str <- main_page %>% rvest::html_element("{CSS_SELECTOR} > p") %>% rvest::html_text()
-    # events_str <- main_page %>% rvest::html_element("{CSS_SELECTOR} > ul") %>% rvest::html_text()
-    # ppl_str <- main_page %>% rvest::html_elements("{CSS_SELECTOR} > .hlist") %>% rvest::html_text()
-    # 
-    # today_list_str <- c(days_str, events_str, ppl_str) %>%
-    #   paste0(collapse="") %>%
-    #   stringi::stri_enc_toascii()
     
   } else {
     
@@ -94,10 +77,6 @@ read_wiki_html <- function(main_page, archive) {
   
   return(today_list_str)
 }
-
-#TODO add args to specify which outputs are wanted
-#TODO convert dfs into cli_ unordered list
-
 
 #' Grab daily facts from "https://en.wikipedia.org/wiki/Main_Page" and print out
 #' @param wiki_date str, date of article we are looking for.
@@ -113,18 +92,21 @@ get_daily_facts <- function(wiki_date = NULL) {
     text_to_event_list()
   
   # Current Date
-  cli::cli_h1(cli::col_green(
-    glue::glue("Guess What Happened On {format(Sys.Date(),'%B %d')}!")
-  ))
-  cli::cli_text(paste("Today's Date:", cli::style_italic(format(
-    Sys.Date(), "%A %d %B %Y"
-  ))))
+  # cli::cli_h1(cli::col_green(
+  #   glue::glue("Guess What Happened On {format(Sys.Date(),'%B %d')}!")
+  # ))
+  h1_cyan("Guess What Happened Today!")
+  italic_date()
+  # cli::cli_text(paste("Today's Date:", cli::style_italic(format(
+  #   Sys.Date(), "%A %d %B %Y"
+  # ))))
   
   # National Holidays
   national_days <- stringr::str_split_i(events_list[1], pattern = ":", i = 2) #[[1]][2]
   
   if(!is.na(national_days)) {
-    cli::cli_h2(cli::col_cyan("Festivals / National Days of Importance / Holidays"))
+    #cli::cli_h2(cli::col_cyan("Festivals / National Days of Importance / Holidays"))
+    h2_cyan("Festivals / National Days of Importance / Holidays")
     
     nat_days_list <- stringr::str_split_i(national_days, pattern = ";", i = 1) %>% #[[1]] 
       stringr::str_squish()
@@ -146,7 +128,6 @@ get_daily_facts <- function(wiki_date = NULL) {
       )
 
   ## Famous Figures
-  browser()
   famous_ppl_tbl <- events_list %>% 
     create_births_deaths_table() %>%
     tbl_to_cli_output(
