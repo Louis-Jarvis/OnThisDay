@@ -4,10 +4,10 @@
 \alias{make_request}
 \title{Make request to Wikipedia and return page as a string}
 \usage{
-make_request(wiki_date = NULL)
+make_request(date_str = NULL)
 }
 \arguments{
-\item{wiki_date}{string, giving date of desired article.}
+\item{date_str}{string, giving date of desired article.}
 }
 \value{
 multiline string

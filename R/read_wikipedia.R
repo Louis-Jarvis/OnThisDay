@@ -1,21 +1,21 @@
-#' Check the wiki_date is valid
+#' Check the date_str is valid
 #'
-#' @param wiki_date string, giving date of desired article.
+#' @param date_str string, giving date of desired article.
 #
 #' @return multiline string
 #' 
 #' TODO fix return 
-check_date_input <- function(wiki_date) {
-  wiki_date <- stringr::str_to_title(wiki_date)
-  num_str <- stringr::str_extract(wiki_date, "[[:digit:]]+")
+check_date_input <- function(date_str) {
+  date_str <- stringr::str_to_title(date_str)
+  num_str <- stringr::str_extract(date_str, "[[:digit:]]+")
   mnth_str <-
-    stringr::str_extract(wiki_date, paste(month.name, collapse = "|"))
+    stringr::str_extract(date_str, paste(month.name, collapse = "|"))
   
   date_str <-
     try(as.Date(paste(num_str, mnth_str), format = "%d %B"))
   
   if ("try-error" %in% class(date_str) || is.na(date_str)) {
-    stop(glue::glue("Invalid Input: \'{wiki_date}'\ is not a real date!"))
+    stop(glue::glue("Invalid Input: \'{date_str}'\ is not a real date!"))
   }
   
   return(list(
@@ -25,11 +25,11 @@ check_date_input <- function(wiki_date) {
 }
 
 get_url_from_date <- function(date_string) {
-  dt <- check_date_input(date_string)
   
   BASE_URL <- "https://en.wikipedia.org/wiki"
   
   if (!is.null(date_string)) {
+    dt <- check_date_input(date_string)
     cli::cli_alert_info("Retrieving info for: {.field {dt$num_str} {dt$mnth_str}}")
     url_str <- glue::glue("{BASE_URL}/Wikipedia:Selected_anniversaries/{dt$mnth_str}_{dt$num_str}")
   } else {
@@ -45,13 +45,13 @@ get_url_from_date <- function(date_string) {
 #
 #' @return multiline string
 #' 
-make_request <- function(wiki_date = NULL) {
+make_request <- function(date_str = NULL) {
 
   BASE_URL <- "https://en.wikipedia.org/wiki"
   
-  if (!is.null(wiki_date)) {
+  if (!is.null(date_str)) {
     
-    dt <- check_date_input(wiki_date)
+    dt <- check_date_input(date_str)
     
     cli::cli_alert_info("Retrieving info for: {.field {dt$num_str} {dt$mnth_str}}")
     main_page <-
