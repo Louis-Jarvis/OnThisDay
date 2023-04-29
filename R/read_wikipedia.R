@@ -4,13 +4,14 @@
 #
 #' @return list with the month and number of month to be fed into [rvest::read_html] query string
 #' 
-#' TODO fix return 
 check_date_input <- function(date_str) {
   date_str <- stringr::str_to_title(date_str)
   num_str <- stringr::str_extract(date_str, "[[:digit:]]+")
   mnth_str <-
-    stringr::str_extract(date_str, paste(month.name, collapse = "|"))
-  
+    stringr::str_extract(date_str, paste(month.abb, collapse = "|"))
+    
+  mnth_str <- month.name[match(mnth_str,month.abb)]
+    
   date_str <-
     try(as.Date(paste(num_str, mnth_str), format = "%d %B"))
   
