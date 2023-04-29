@@ -1,8 +1,8 @@
-#' Check the date_str is valid
+#' Check the date_str is valid, return the query parameters
 #'
 #' @param date_str string, giving date of desired article.
 #
-#' @return multiline string
+#' @return list with the month and number of month to be fed into [rvest::read_html] query string
 #' 
 #' TODO fix return 
 check_date_input <- function(date_str) {
@@ -93,10 +93,11 @@ read_wiki_html <- function(main_page, archive) {
       stringi::stri_enc_toascii()
     
   } else {
+    ON_THIS_DAY_SELECTOR <- "#mp-otd"
     
     today_list_str <- main_page %>% 
-      rvest::html_element("#mp-otd") %>% # use css selectors to obtain div
-      rvest::html_text() %>%
+      rvest::html_element(ON_THIS_DAY_SELECTOR) %>% # use css selectors to obtain div
+      rvest::html_text2() %>%
       stringi::stri_enc_toascii()
   }
   
