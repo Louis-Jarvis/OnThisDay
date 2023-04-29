@@ -2,16 +2,18 @@
 % Please edit documentation in R/read_wikipedia.R
 \name{check_date_input}
 \alias{check_date_input}
-\title{Check the wiki_date is valid}
+\title{Check the date_str is valid}
 \usage{
-check_date_input(wiki_date)
+check_date_input(date_str)
 }
 \arguments{
-\item{wiki_date}{string, giving date of desired article.}
+\item{date_str}{string, giving date of desired article.}
 }
 \value{
 multiline string
+
+TODO fix return
 }
 \description{
-Check the wiki_date is valid
+Check the date_str is valid
 }
