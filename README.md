@@ -3,14 +3,19 @@
 # OnThisDay
 
 <!-- badges: start -->
+
 [![R-CMD-check](https://github.com/Louis-Jarvis/OnThisDay/actions/workflows/check-release.yaml/badge.svg)](https://github.com/Louis-Jarvis/OnThisDay/actions/workflows/check-release.yaml)
+[![Codecov test coverage](https://codecov.io/gh/r-lib/covr/branch/master/graph/badge.svg)](https://app.codecov.io/gh/r-lib/covr?branch=master)
+
+
 <!-- badges: end -->
 
 The goal of OnThisDay is to Scrape Wikipedia's "On This Day" section and return a summary of the events.
 
 ## Installation
-Download the `tar.gz` from [github](https://github.com/Louis-Jarvis/OnThisDay).
-Windows users will need Rtools [(cran link here)](https://cran.r-project.org/bin/windows/Rtools/) to build the package from source.
+
+Download the `tar.gz` from [github](https://github.com/Louis-Jarvis/OnThisDay). Windows users will need Rtools [(cran link here)](https://cran.r-project.org/bin/windows/Rtools/) to build the package from source.
+
 ``` r
 devtools::install("./OnThisDay_1.0.0.tar.gz", dependencies = TRUE)
 #or 
